@@ -27,7 +27,7 @@ class PermissionResolver
     {
         $cacheKey = "perm:{$user->id}:{$clusterId}:{$applicationId}:" . ($moduleId ?? 'null');
 
-        return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($user, $clusterId, $applicationId, $moduleId) {
+        return Cache::tags(["user_perms:{$user->id}"])->remember($cacheKey, self::CACHE_TTL, function () use ($user, $clusterId, $applicationId, $moduleId) {
             // Step 1: Admin shortcut
             if ($user->isClusterAdmin($clusterId)) {
                 return true;
@@ -55,7 +55,7 @@ class PermissionResolver
     {
         $cacheKey = "access_map:{$user->id}:{$clusterId}";
 
-        return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($user, $clusterId) {
+        return Cache::tags(["user_perms:{$user->id}"])->remember($cacheKey, self::CACHE_TTL, function () use ($user, $clusterId) {
             $appIds = $user->accessibleAppIds($clusterId);
             $moduleIds = $user->accessibleModuleIds($clusterId);
 
@@ -79,7 +79,7 @@ class PermissionResolver
     {
         $cacheKey = "clusters:{$user->id}";
 
-        return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($user) {
+        return Cache::tags(["user_perms:{$user->id}"])->remember($cacheKey, self::CACHE_TTL, function () use ($user) {
             if ($user->isGlobalAdmin()) {
                 return Cluster::active()->pluck('id')->toArray();
             }
@@ -129,8 +129,6 @@ class PermissionResolver
      */
     public function clearCache(User $user): void
     {
-        // In production, use cache tags for efficient invalidation.
-        // For now, we rely on TTL-based expiration.
-        Cache::forget("clusters:{$user->id}");
+        Cache::tags(["user_perms:{$user->id}"])->flush();
     }
 }

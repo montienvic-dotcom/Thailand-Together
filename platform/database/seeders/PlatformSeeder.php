@@ -149,7 +149,7 @@ class PlatformSeeder extends Seeder
             ]));
         }
 
-        // ── Sample Applications ──
+        // ── Applications (10 apps — all enabled in Pattaya) ──
         $apps = [
             ['name' => 'App Together', 'slug' => 'app-together', 'code' => 'APP_TOGETHER', 'type' => 'mobile', 'source' => 'internal', 'icon' => 'compass', 'color' => '#FF6B35', 'sort_order' => 1],
             ['name' => 'Hotel Management', 'slug' => 'hotel-management', 'code' => 'HOTEL_MGMT', 'type' => 'web', 'source' => 'codecanyon', 'icon' => 'building', 'color' => '#004E89', 'sort_order' => 2],
@@ -157,6 +157,10 @@ class PlatformSeeder extends Seeder
             ['name' => 'Marketplace', 'slug' => 'marketplace', 'code' => 'MARKETPLACE', 'type' => 'hybrid', 'source' => 'codecanyon', 'icon' => 'shopping-bag', 'color' => '#C14953', 'sort_order' => 4],
             ['name' => 'Rewards Center', 'slug' => 'rewards-center', 'code' => 'REWARDS', 'type' => 'web', 'source' => 'internal', 'icon' => 'gift', 'color' => '#F4A261', 'sort_order' => 5],
             ['name' => 'HelpDesk', 'slug' => 'helpdesk', 'code' => 'HELPDESK', 'type' => 'web', 'source' => 'codecanyon', 'icon' => 'headphones', 'color' => '#6C757D', 'sort_order' => 6],
+            ['name' => 'City Location - Digital Twin', 'slug' => 'city-digital-twin', 'code' => 'CITY_DIGITAL_TWIN', 'type' => 'hybrid', 'source' => 'internal', 'icon' => 'globe', 'color' => '#2EC4B6', 'sort_order' => 7],
+            ['name' => 'Social Network', 'slug' => 'social-network', 'code' => 'SOCIAL_NETWORK', 'type' => 'hybrid', 'source' => 'internal', 'icon' => 'users', 'color' => '#E71D36', 'sort_order' => 8],
+            ['name' => 'Referral & Partner Hub', 'slug' => 'partner-hub', 'code' => 'PARTNER_HUB', 'type' => 'web', 'source' => 'internal', 'icon' => 'share-2', 'color' => '#8338EC', 'sort_order' => 9],
+            ['name' => 'UGC & AI Content Hub', 'slug' => 'ugc-ai-hub', 'code' => 'UGC_AI_HUB', 'type' => 'hybrid', 'source' => 'internal', 'icon' => 'edit-3', 'color' => '#3A86FF', 'sort_order' => 10],
         ];
 
         foreach ($apps as $app) {
@@ -177,30 +181,72 @@ class PlatformSeeder extends Seeder
             ]);
         }
 
-        // ── Sample Modules for App Together ──
-        $appTogetherId = DB::table('applications')->where('code', 'APP_TOGETHER')->value('id');
-        $modules = [
-            ['name' => 'Explore', 'slug' => 'explore', 'code' => 'EXPLORE', 'sort_order' => 1],
-            ['name' => 'Booking', 'slug' => 'booking', 'code' => 'BOOKING', 'sort_order' => 2],
-            ['name' => 'Map & Navigation', 'slug' => 'map', 'code' => 'MAP', 'sort_order' => 3],
-            ['name' => 'Chat & Support', 'slug' => 'chat', 'code' => 'CHAT', 'sort_order' => 4],
-            ['name' => 'My Rewards', 'slug' => 'rewards', 'code' => 'MY_REWARDS', 'sort_order' => 5],
-            ['name' => 'My Profile', 'slug' => 'profile', 'code' => 'PROFILE', 'sort_order' => 6],
-            ['name' => 'Deals & Promotions', 'slug' => 'deals', 'code' => 'DEALS', 'sort_order' => 7],
-            ['name' => 'Reviews & Ratings', 'slug' => 'reviews', 'code' => 'REVIEWS', 'sort_order' => 8],
+        // ── Modules per Application ──
+        $appModules = [
+            'APP_TOGETHER' => [
+                ['name' => 'Explore', 'slug' => 'explore', 'code' => 'EXPLORE', 'sort_order' => 1],
+                ['name' => 'Booking', 'slug' => 'booking', 'code' => 'BOOKING', 'sort_order' => 2],
+                ['name' => 'Map & Navigation', 'slug' => 'map', 'code' => 'MAP', 'sort_order' => 3],
+                ['name' => 'Chat & Support', 'slug' => 'chat', 'code' => 'CHAT', 'sort_order' => 4],
+                ['name' => 'My Rewards', 'slug' => 'rewards', 'code' => 'MY_REWARDS', 'sort_order' => 5],
+                ['name' => 'My Profile', 'slug' => 'profile', 'code' => 'PROFILE', 'sort_order' => 6],
+                ['name' => 'Deals & Promotions', 'slug' => 'deals', 'code' => 'DEALS', 'sort_order' => 7],
+                ['name' => 'Reviews & Ratings', 'slug' => 'reviews', 'code' => 'REVIEWS', 'sort_order' => 8],
+            ],
+            'CITY_DIGITAL_TWIN' => [
+                ['name' => '3D City Map', 'slug' => 'city-map-3d', 'code' => 'CITY_MAP_3D', 'description' => 'Digital Twin 3D city map', 'sort_order' => 1],
+                ['name' => 'Points of Interest', 'slug' => 'poi', 'code' => 'POI', 'description' => 'Landmarks, shops, restaurants, attractions', 'sort_order' => 2],
+                ['name' => 'AR Navigation', 'slug' => 'ar-nav', 'code' => 'AR_NAV', 'description' => 'Augmented reality walking navigation', 'sort_order' => 3],
+                ['name' => 'Virtual Tour 360', 'slug' => 'virtual-tour', 'code' => 'VIRTUAL_TOUR', 'description' => 'Virtual 360-degree city exploration', 'sort_order' => 4],
+                ['name' => 'Real-time City Data', 'slug' => 'city-realtime', 'code' => 'CITY_REALTIME', 'description' => 'Live city data: weather, traffic, crowd density', 'sort_order' => 5],
+                ['name' => 'Smart Directory', 'slug' => 'smart-directory', 'code' => 'SMART_DIRECTORY', 'description' => 'Location and hours-based shop/service search', 'sort_order' => 6],
+                ['name' => 'Route Planner', 'slug' => 'route-planner', 'code' => 'ROUTE_PLANNER', 'description' => 'Optimized sightseeing, dining, and shopping routes', 'sort_order' => 7],
+            ],
+            'SOCIAL_NETWORK' => [
+                ['name' => 'Feed & Timeline', 'slug' => 'feed', 'code' => 'FEED', 'description' => 'Share travel experiences', 'sort_order' => 1],
+                ['name' => 'Travel Stories', 'slug' => 'stories', 'code' => 'STORIES', 'description' => 'Travel stories with photos and videos', 'sort_order' => 2],
+                ['name' => 'Friends & Followers', 'slug' => 'friends', 'code' => 'FRIENDS', 'description' => 'Connect with other travelers', 'sort_order' => 3],
+                ['name' => 'Messaging', 'slug' => 'messaging', 'code' => 'MESSAGING', 'description' => 'Private and group chat', 'sort_order' => 4],
+                ['name' => 'Groups & Communities', 'slug' => 'groups', 'code' => 'GROUPS', 'description' => 'Interest and destination-based groups', 'sort_order' => 5],
+                ['name' => 'Events', 'slug' => 'events', 'code' => 'EVENTS', 'description' => 'Local events and traveler meetups', 'sort_order' => 6],
+                ['name' => 'Check-in & Places', 'slug' => 'checkin', 'code' => 'CHECKIN', 'description' => 'Location check-ins, recommendations, point collection', 'sort_order' => 7],
+            ],
+            'PARTNER_HUB' => [
+                ['name' => 'Referrer Program', 'slug' => 'referrer', 'code' => 'REFERRER', 'description' => 'Referral codes, tracking links, multi-tier rewards', 'sort_order' => 1],
+                ['name' => 'Influencer Management', 'slug' => 'influencer', 'code' => 'INFLUENCER', 'description' => 'KOL/influencer profiles, campaigns, performance tracking', 'sort_order' => 2],
+                ['name' => 'Content Builder', 'slug' => 'content-builder', 'code' => 'CONTENT_BUILDER', 'description' => 'Drag-and-drop content editor with templates', 'sort_order' => 3],
+                ['name' => 'Merchant Inviter', 'slug' => 'merchant-inviter', 'code' => 'MERCHANT_INVITER', 'description' => 'Merchant invitation tracking and onboarding', 'sort_order' => 4],
+                ['name' => 'Commission & Payout', 'slug' => 'commission', 'code' => 'COMMISSION', 'description' => 'Commission rules, payout schedules, wallet management', 'sort_order' => 5],
+                ['name' => 'Tier & Incentives', 'slug' => 'tier-incentives', 'code' => 'TIER_INCENTIVES', 'description' => 'Partner tiers (Bronze-Platinum), auto-upgrade, leaderboard', 'sort_order' => 6],
+                ['name' => 'Performance Analytics', 'slug' => 'partner-analytics', 'code' => 'PARTNER_ANALYTICS', 'description' => 'Conversion funnels, ROI analysis, channel heatmaps', 'sort_order' => 7],
+            ],
+            'UGC_AI_HUB' => [
+                ['name' => 'UGC Feed', 'slug' => 'ugc-feed', 'code' => 'UGC_FEED', 'description' => 'User-generated reviews, photos, videos, and tips', 'sort_order' => 1],
+                ['name' => 'AI Content Generator', 'slug' => 'ai-content-gen', 'code' => 'AI_CONTENT_GEN', 'description' => 'AI-powered descriptions, itineraries, and social posts', 'sort_order' => 2],
+                ['name' => 'AI Resource Database', 'slug' => 'ai-resource-db', 'code' => 'AI_RESOURCE_DB', 'description' => 'AI-enriched venue database with auto-categorization', 'sort_order' => 3],
+                ['name' => 'Content Moderation', 'slug' => 'content-mod', 'code' => 'CONTENT_MOD', 'description' => 'AI spam detection, sentiment analysis, review queue', 'sort_order' => 4],
+                ['name' => 'Media Library', 'slug' => 'media-lib', 'code' => 'MEDIA_LIB', 'description' => 'Asset management with AI auto-tagging and CDN', 'sort_order' => 5],
+                ['name' => 'Multi-language Engine', 'slug' => 'multi-lang', 'code' => 'MULTI_LANG', 'description' => 'AI auto-translation (TH/EN/ZH/JA/KO/RU) with TTS', 'sort_order' => 6],
+                ['name' => 'Content Curation', 'slug' => 'content-curation', 'code' => 'CONTENT_CURATION', 'description' => 'AI quality scoring, editorial picks, auto-publishing', 'sort_order' => 7],
+            ],
         ];
 
-        foreach ($modules as $module) {
-            DB::table('modules')->insert(array_merge($module, [
-                'application_id' => $appTogetherId,
-                'is_active' => true,
-                'is_premium' => false,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]));
+        foreach ($appModules as $appCode => $modules) {
+            $applicationId = DB::table('applications')->where('code', $appCode)->value('id');
+            foreach ($modules as $module) {
+                DB::table('modules')->insert(array_merge([
+                    'application_id' => $applicationId,
+                    'description' => null,
+                    'is_active' => true,
+                    'is_premium' => false,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ], $module));
+            }
         }
 
         // ── Default Menu Items ──
+        $appTogetherId = DB::table('applications')->where('code', 'APP_TOGETHER')->value('id');
         $menuItems = [
             ['label' => 'Home', 'icon' => 'home', 'url' => '/', 'scope' => 'global', 'visibility' => 'all', 'sort_order' => 1],
             ['label' => 'Explore', 'icon' => 'compass', 'url' => '/explore', 'scope' => 'global', 'visibility' => 'all', 'sort_order' => 2, 'application_id' => $appTogetherId],
