@@ -18,8 +18,8 @@ return new class extends Migration
             $table->string('color', 7)->nullable(); // hex color
             $table->string('type')->default('web'); // web, mobile, api, hybrid
             $table->string('base_url')->nullable(); // where the app lives
-            $table->string('source')->default('internal'); // internal, codecanyon, third-party
-            $table->string('source_version')->nullable(); // CodeCanyon version tracking
+            $table->string('source')->default('internal'); // internal, external, third-party
+            $table->string('source_version')->nullable(); // External source version tracking
             $table->boolean('is_active')->default(true);
             $table->boolean('show_in_menu')->default(true);
             $table->integer('sort_order')->default(0);

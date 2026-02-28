@@ -152,11 +152,11 @@ class PlatformSeeder extends Seeder
         // ── Applications (10 apps — all enabled in Pattaya) ──
         $apps = [
             ['name' => 'App Together', 'slug' => 'app-together', 'code' => 'APP_TOGETHER', 'type' => 'mobile', 'source' => 'internal', 'icon' => 'compass', 'color' => '#FF6B35', 'sort_order' => 1],
-            ['name' => 'Hotel Management', 'slug' => 'hotel-management', 'code' => 'HOTEL_MGMT', 'type' => 'web', 'source' => 'codecanyon', 'icon' => 'building', 'color' => '#004E89', 'sort_order' => 2],
-            ['name' => 'Tour Booking', 'slug' => 'tour-booking', 'code' => 'TOUR_BOOKING', 'type' => 'hybrid', 'source' => 'codecanyon', 'icon' => 'map', 'color' => '#1A936F', 'sort_order' => 3],
-            ['name' => 'Marketplace', 'slug' => 'marketplace', 'code' => 'MARKETPLACE', 'type' => 'hybrid', 'source' => 'codecanyon', 'icon' => 'shopping-bag', 'color' => '#C14953', 'sort_order' => 4],
+            ['name' => 'Hotel Management', 'slug' => 'hotel-management', 'code' => 'HOTEL_MGMT', 'type' => 'web', 'source' => 'external', 'icon' => 'building', 'color' => '#004E89', 'sort_order' => 2],
+            ['name' => 'Tour Booking', 'slug' => 'tour-booking', 'code' => 'TOUR_BOOKING', 'type' => 'hybrid', 'source' => 'external', 'icon' => 'map', 'color' => '#1A936F', 'sort_order' => 3],
+            ['name' => 'Marketplace', 'slug' => 'marketplace', 'code' => 'MARKETPLACE', 'type' => 'hybrid', 'source' => 'external', 'icon' => 'shopping-bag', 'color' => '#C14953', 'sort_order' => 4],
             ['name' => 'Rewards Center', 'slug' => 'rewards-center', 'code' => 'REWARDS', 'type' => 'web', 'source' => 'internal', 'icon' => 'gift', 'color' => '#F4A261', 'sort_order' => 5],
-            ['name' => 'HelpDesk', 'slug' => 'helpdesk', 'code' => 'HELPDESK', 'type' => 'web', 'source' => 'codecanyon', 'icon' => 'headphones', 'color' => '#6C757D', 'sort_order' => 6],
+            ['name' => 'HelpDesk', 'slug' => 'helpdesk', 'code' => 'HELPDESK', 'type' => 'web', 'source' => 'external', 'icon' => 'headphones', 'color' => '#6C757D', 'sort_order' => 6],
             ['name' => 'City Location - Digital Twin', 'slug' => 'city-digital-twin', 'code' => 'CITY_DIGITAL_TWIN', 'type' => 'hybrid', 'source' => 'internal', 'icon' => 'globe', 'color' => '#2EC4B6', 'sort_order' => 7],
             ['name' => 'Social Network', 'slug' => 'social-network', 'code' => 'SOCIAL_NETWORK', 'type' => 'hybrid', 'source' => 'internal', 'icon' => 'users', 'color' => '#E71D36', 'sort_order' => 8],
             ['name' => 'Referral & Partner Hub', 'slug' => 'partner-hub', 'code' => 'PARTNER_HUB', 'type' => 'web', 'source' => 'internal', 'icon' => 'share-2', 'color' => '#8338EC', 'sort_order' => 9],

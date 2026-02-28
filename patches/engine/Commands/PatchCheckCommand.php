@@ -8,7 +8,7 @@ use ThailandTogether\Patches\PatchManager;
 class PatchCheckCommand extends Command
 {
     protected $signature = 'patches:check';
-    protected $description = 'Check status of all patches (after CodeCanyon updates)';
+    protected $description = 'Check status of all patches (after external source updates)';
 
     public function handle(): int
     {

@@ -236,7 +236,7 @@ Result: ALLOW or DENY (most specific rule wins)
 
 ## Patch Management System
 
-CodeCanyon scripts may have bugs. We maintain patches separately:
+External scripts may have bugs. We maintain patches separately:
 
 ```
 patches/
@@ -256,9 +256,9 @@ patches/
 ```
 
 ### Patch Workflow:
-1. Claude scans CodeCanyon code → identifies bugs
+1. Claude scans external code → identifies bugs
 2. Creates patch files (non-destructive, override-based)
-3. After CodeCanyon update → run `php artisan patches:check`
+3. After external update → run `php artisan patches:check`
 4. Patches auto-detect conflicts and report status
 5. Claude creates updated patches if needed
 
@@ -378,7 +378,7 @@ Thailand-Together/
 │   ├── registry.json
 │   └── engine/
 │
-├── adapters/                          # CodeCanyon app adapters
+├── adapters/                          # External app adapters
 │   ├── adapter-interface.php
 │   └── {app-name}/
 │
@@ -427,5 +427,5 @@ Thailand-Together/
 6. ✅ Backend Admin System
 7. ✅ Pattaya cluster setup
 8. ⬜ App Together (Mobile) integration
-9. ⬜ CodeCanyon apps integration
+9. ⬜ External apps integration
 10. ⬜ Third-party API connections (live)

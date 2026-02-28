@@ -8,7 +8,7 @@ use ThailandTogether\Patches\PatchManager;
 class PatchApplyCommand extends Command
 {
     protected $signature = 'patches:apply {--id= : Apply a specific patch by ID}';
-    protected $description = 'Apply pending patches to CodeCanyon scripts';
+    protected $description = 'Apply pending patches to external scripts';
 
     public function handle(): int
     {

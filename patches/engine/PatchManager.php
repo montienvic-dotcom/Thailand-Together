@@ -3,7 +3,7 @@
 namespace ThailandTogether\Patches;
 
 /**
- * Patch Manager - Applies, checks, and rolls back patches for CodeCanyon scripts.
+ * Patch Manager - Applies, checks, and rolls back patches for external scripts.
  *
  * Patch types:
  * 1. File patches (find/replace in specific files)
@@ -140,7 +140,7 @@ class PatchManager
                     return 'applied';
                 }
                 if (str_contains($content, $patch['find'])) {
-                    return 'reverted_by_update'; // CodeCanyon update overwrote our fix
+                    return 'reverted_by_update'; // External update overwrote our fix
                 }
                 return 'code_changed'; // Neither original nor patched code found
             }

@@ -41,9 +41,9 @@ class Application extends Model
             ->withTimestamps();
     }
 
-    public function isFromCodeCanyon(): bool
+    public function isFromExternal(): bool
     {
-        return $this->source === 'codecanyon';
+        return $this->source === 'external';
     }
 
     public function scopeActive($query)
