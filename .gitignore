@@ -1,0 +1,14 @@
+# Laravel
+platform/vendor/
+platform/node_modules/
+platform/database/database.sqlite
+platform/.env
+platform/storage/logs/*.log
+platform/storage/framework/cache/*
+platform/storage/framework/sessions/*
+platform/storage/framework/views/*
+platform/bootstrap/cache/*
+
+# OS
+.DS_Store
+Thumbs.db
