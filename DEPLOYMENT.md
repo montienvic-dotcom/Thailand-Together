@@ -12,22 +12,26 @@ GitHub Actions CI/CD
     ├── 2. Install PHP deps (--no-dev)
     ├── 3. Build frontend (npm run build)
     ├── 4. Rsync to Hostinger
-    └── 5. SSH: migrate + cache
+    └── 5. SSH: migrate + cache + copy assets
             │
             ▼
 Hostinger Cloud Hosting
     ~/pattayatogether/          ← Laravel app
-    ~/domains/platform.pattayatogether.com/
-        public_html/ → ~/pattayatogether/public/  (symlink)
+    ~/domains/pattayatogether.com/
+        public_html/platform/   ← Web root (bridge index.php)
 ```
+
+> **Note:** Hostinger disables `symlink()`. Instead of symlinking `public_html`,
+> we use a bridge `index.php` that loads Laravel from `~/pattayatogether/`.
+> Static assets (Vite build, uploads) are copied to `public_html/platform/`.
 
 ---
 
-## First-Time Setup (ทำครั้งเดียว)
+## First-Time Setup
 
 ### Step 1: Prepare Hostinger
 
-1. **Login to hPanel** → platform.pattayatogether.com
+1. **Login to hPanel** → pattayatogether.com
 
 2. **Create MySQL Database** via hPanel → Databases:
    - Database name: `u504097778_platform`
@@ -51,25 +55,24 @@ cat ~/.ssh/hostinger_deploy.pub
 # Paste the output into hPanel
 
 # Test connection
-ssh -p 65002 u504097778@46.202.187.217
+ssh -i ~/.ssh/hostinger_deploy -p 65002 u504097778@46.202.187.217
 ```
 
 ### Step 3: Run Initial Setup on Server
 
 ```bash
 # SSH into Hostinger
-ssh -p 65002 u504097778@46.202.187.217
+ssh -i ~/.ssh/hostinger_deploy -p 65002 u504097778@46.202.187.217
 
 # Create the setup script (or upload it)
-mkdir -p ~/pattayatogether
-# Copy scripts/setup-hostinger.sh content and run it
-bash setup-hostinger.sh
+nano ~/setup-hostinger.sh
+# Paste contents of scripts/setup-hostinger.sh
+bash ~/setup-hostinger.sh
 ```
 
 ### Step 4: Configure .env on Server
 
 ```bash
-ssh -p 65002 u504097778@46.202.187.217
 nano ~/pattayatogether/.env
 
 # Fill in your MySQL credentials:
@@ -110,7 +113,7 @@ git push origin main
 After first deploy, SSH in and generate the app key:
 
 ```bash
-ssh -p 65002 u504097778@46.202.187.217
+ssh -i ~/.ssh/hostinger_deploy -p 65002 u504097778@46.202.187.217
 cd ~/pattayatogether
 php artisan key:generate
 php artisan migrate --force
@@ -130,6 +133,8 @@ Every time you push to the `main` branch:
 6. **Post-deploy** runs on server:
    - Database migrations
    - Config/route/view caching
+   - Copy assets to public_html (build/, storage/, favicon, etc.)
+   - Ensure bridge index.php and .htaccess exist
    - Queue worker restart
 
 ### What's preserved on server (never overwritten):
@@ -137,7 +142,34 @@ Every time you push to the `main` branch:
 - `storage/logs/` (application logs)
 - `storage/framework/sessions/` (user sessions)
 - `storage/app/public/` (uploaded files)
-- `database/database.sqlite` (if used)
+- `public_html/platform/index.php` (bridge file)
+- `public_html/platform/.htaccess`
+
+---
+
+## Bridge Architecture (No Symlink)
+
+Hostinger disables `symlink()`, so we use a bridge approach:
+
+```
+Request → https://platform.pattayatogether.com
+    │
+    ▼
+~/domains/pattayatogether.com/public_html/platform/
+    ├── index.php          ← Bridge: loads Laravel from ~/pattayatogether
+    ├── .htaccess          ← Routes all requests to index.php
+    ├── build/             ← Vite compiled assets (copied after deploy)
+    └── storage/           ← Uploaded files (copied after deploy)
+    │
+    ▼ (index.php loads)
+~/pattayatogether/
+    ├── vendor/autoload.php
+    ├── bootstrap/app.php
+    └── (full Laravel app)
+```
+
+Static assets (CSS, JS, images) must be copied to `public_html/platform/`
+after each deploy since they need to be served directly by Apache.
 
 ---
 
@@ -147,7 +179,7 @@ If you need to deploy manually (without pushing to GitHub):
 
 ```bash
 # SSH into server
-ssh -p 65002 u504097778@46.202.187.217
+ssh -i ~/.ssh/hostinger_deploy -p 65002 u504097778@46.202.187.217
 
 # Run deploy script
 bash ~/pattayatogether/scripts/deploy-server.sh
@@ -164,13 +196,12 @@ curl -I https://platform.pattayatogether.com
 
 ### View logs on server
 ```bash
-ssh -p 65002 u504097778@46.202.187.217
+ssh -i ~/.ssh/hostinger_deploy -p 65002 u504097778@46.202.187.217
 tail -50 ~/pattayatogether/storage/logs/laravel.log
 ```
 
 ### Clear all caches
 ```bash
-ssh -p 65002 u504097778@46.202.187.217
 cd ~/pattayatogether
 php artisan cache:clear
 php artisan config:clear
@@ -218,28 +249,30 @@ hPanel → Advanced → Cron Jobs:
 ```
 /home/u504097778/
 ├── domains/
-│   └── platform.pattayatogether.com/
-│       └── public_html/ → ~/pattayatogether/public  (symlink)
+│   └── pattayatogether.com/
+│       └── public_html/
+│           └── platform/              ← Web root for subdomain
+│               ├── index.php          ← Bridge (loads Laravel)
+│               ├── .htaccess          ← Apache rewrite rules
+│               ├── build/             ← Vite assets (copied)
+│               └── storage/           ← Uploaded files (copied)
 │
-├── pattayatogether/            ← Laravel application
+├── pattayatogether/                   ← Laravel application
 │   ├── app/
 │   ├── bootstrap/
 │   ├── config/
 │   ├── database/
-│   ├── public/                  ← Served via public_html symlink
-│   │   ├── build/               ← Vite compiled assets
-│   │   ├── storage/ → ../../storage/app/public
-│   │   ├── index.php
-│   │   └── .htaccess
+│   ├── public/                        ← Laravel public dir (not web root)
+│   │   └── build/                     ← Vite compiled assets
 │   ├── resources/
 │   ├── routes/
 │   ├── scripts/
 │   ├── storage/
-│   │   ├── app/public/          ← User uploads
+│   │   ├── app/public/                ← User uploads
 │   │   ├── framework/
 │   │   └── logs/
 │   ├── vendor/
-│   └── .env                     ← Production config (NOT in git)
+│   └── .env                           ← Production config (NOT in git)
 │
-└── .ssh/                        ← SSH keys
+└── .ssh/                              ← SSH keys
 ```
