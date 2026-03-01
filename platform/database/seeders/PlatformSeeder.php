@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 /**
  * Seeds the platform with initial data:
@@ -297,6 +298,81 @@ class PlatformSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ], $provider));
+        }
+
+        // ── Default Admin User ──
+        $adminId = DB::table('users')->insertGetId([
+            'name' => 'Admin',
+            'email' => 'admin@thailandtogether.com',
+            'password' => Hash::make('password'),
+            'status' => 'active',
+            'email_verified_at' => now(),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        // Assign Global Admin role
+        $globalAdminRoleId = DB::table('roles')->where('slug', 'global-admin')->value('id');
+        DB::table('role_user')->insert([
+            'role_id' => $globalAdminRoleId,
+            'user_id' => $adminId,
+            'country_id' => null,
+            'cluster_id' => null,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        // ── Demo Users ──
+        $operatorId = DB::table('users')->insertGetId([
+            'name' => 'Pattaya Operator',
+            'email' => 'operator@thailandtogether.com',
+            'password' => Hash::make('password'),
+            'status' => 'active',
+            'email_verified_at' => now(),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $clusterAdminRoleId = DB::table('roles')->where('slug', 'cluster-admin')->value('id');
+        DB::table('role_user')->insert([
+            'role_id' => $clusterAdminRoleId,
+            'user_id' => $operatorId,
+            'country_id' => null,
+            'cluster_id' => $pattayaId,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $touristId = DB::table('users')->insertGetId([
+            'name' => 'Demo Tourist',
+            'email' => 'tourist@thailandtogether.com',
+            'password' => Hash::make('password'),
+            'status' => 'active',
+            'email_verified_at' => now(),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        // Add tourist to Tourists group
+        $touristGroupId = DB::table('groups')->where('slug', 'tourists')->value('id');
+        DB::table('group_user')->insert([
+            'group_id' => $touristGroupId,
+            'user_id' => $touristId,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        // Give tourist group access to all apps in Pattaya
+        $allAppIds = DB::table('applications')->where('is_active', true)->pluck('id');
+        foreach ($allAppIds as $appIdForAccess) {
+            DB::table('group_app_access')->insert([
+                'group_id' => $touristGroupId,
+                'application_id' => $appIdForAccess,
+                'cluster_id' => $pattayaId,
+                'has_access' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
         }
     }
 }
