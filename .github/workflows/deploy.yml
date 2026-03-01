@@ -146,8 +146,9 @@ jobs:
             # Copy static assets to public_html (symlink disabled on Hostinger)
             mkdir -p ${{ env.PUBLIC_HTML }}
 
-            # Copy Vite build assets
+            # Copy Vite build assets (remove old first to avoid nested build/build/)
             if [ -d "public/build" ]; then
+              rm -rf ${{ env.PUBLIC_HTML }}/build
               cp -r public/build ${{ env.PUBLIC_HTML }}/build
             fi
 
