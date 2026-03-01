@@ -41,7 +41,7 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             @endif
 
-            <x-superapp.module-card :module="$module" />
+            <x-superapp.module-card :module="$module" :color="$app->color ?? '#6C757D'" :icon="$module->icon ?? $app->icon ?? 'cube'" />
 
             @if($loop->last)
                 </div>
