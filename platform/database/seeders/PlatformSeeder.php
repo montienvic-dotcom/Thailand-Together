@@ -157,16 +157,16 @@ class PlatformSeeder extends Seeder
 
         // ── Applications (10 apps — all enabled in Pattaya) ──
         $apps = [
-            ['name' => 'App Together', 'slug' => 'app-together', 'code' => 'APP_TOGETHER', 'type' => 'mobile', 'source' => 'internal', 'icon' => 'compass', 'color' => '#FF6B35', 'sort_order' => 1],
-            ['name' => 'Hotel Management', 'slug' => 'hotel-management', 'code' => 'HOTEL_MGMT', 'type' => 'web', 'source' => 'external', 'icon' => 'building', 'color' => '#004E89', 'sort_order' => 2],
-            ['name' => 'Tour Booking', 'slug' => 'tour-booking', 'code' => 'TOUR_BOOKING', 'type' => 'hybrid', 'source' => 'external', 'icon' => 'map', 'color' => '#1A936F', 'sort_order' => 3],
-            ['name' => 'Marketplace', 'slug' => 'marketplace', 'code' => 'MARKETPLACE', 'type' => 'hybrid', 'source' => 'external', 'icon' => 'shopping-bag', 'color' => '#C14953', 'sort_order' => 4],
-            ['name' => 'Rewards Center', 'slug' => 'rewards-center', 'code' => 'REWARDS', 'type' => 'web', 'source' => 'internal', 'icon' => 'gift', 'color' => '#F4A261', 'sort_order' => 5],
-            ['name' => 'HelpDesk', 'slug' => 'helpdesk', 'code' => 'HELPDESK', 'type' => 'web', 'source' => 'external', 'icon' => 'headphones', 'color' => '#6C757D', 'sort_order' => 6],
-            ['name' => 'City Location - Digital Twin', 'slug' => 'city-digital-twin', 'code' => 'CITY_DIGITAL_TWIN', 'type' => 'hybrid', 'source' => 'internal', 'icon' => 'globe', 'color' => '#2EC4B6', 'sort_order' => 7],
-            ['name' => 'Social Network', 'slug' => 'social-network', 'code' => 'SOCIAL_NETWORK', 'type' => 'hybrid', 'source' => 'internal', 'icon' => 'users', 'color' => '#E71D36', 'sort_order' => 8],
-            ['name' => 'Referral & Partner Hub', 'slug' => 'partner-hub', 'code' => 'PARTNER_HUB', 'type' => 'web', 'source' => 'internal', 'icon' => 'share-2', 'color' => '#8338EC', 'sort_order' => 9],
-            ['name' => 'UGC & AI Content Hub', 'slug' => 'ugc-ai-hub', 'code' => 'UGC_AI_HUB', 'type' => 'hybrid', 'source' => 'internal', 'icon' => 'edit-3', 'color' => '#3A86FF', 'sort_order' => 10],
+            ['name' => 'App Together', 'slug' => 'app-together', 'code' => 'APP_TOGETHER', 'type' => 'mobile', 'source' => 'internal', 'icon' => 'compass', 'color' => '#FF6B35', 'sort_order' => 1, 'description' => 'All-in-one mobile app for tourists — explore, book, navigate, and earn rewards in one place'],
+            ['name' => 'Hotel Management', 'slug' => 'hotel-management', 'code' => 'HOTEL_MGMT', 'type' => 'web', 'source' => 'external', 'icon' => 'building', 'color' => '#004E89', 'sort_order' => 2, 'description' => 'Complete hotel operations — room management, reservations, guest services, and revenue tracking'],
+            ['name' => 'Tour Booking', 'slug' => 'tour-booking', 'code' => 'TOUR_BOOKING', 'type' => 'hybrid', 'source' => 'external', 'icon' => 'map', 'color' => '#1A936F', 'sort_order' => 3, 'description' => 'Browse and book tours, activities, and experiences — day trips, island hopping, shows, and more'],
+            ['name' => 'Marketplace', 'slug' => 'marketplace', 'code' => 'MARKETPLACE', 'type' => 'hybrid', 'source' => 'external', 'icon' => 'shopping-bag', 'color' => '#C14953', 'sort_order' => 4, 'description' => 'Local shops, souvenirs, food delivery, and services — support local merchants while you travel'],
+            ['name' => 'Rewards Center', 'slug' => 'rewards-center', 'code' => 'REWARDS', 'type' => 'web', 'source' => 'internal', 'icon' => 'gift', 'color' => '#F4A261', 'sort_order' => 5, 'description' => 'Earn and redeem points across all services — exclusive deals, tier benefits, and cross-cluster rewards'],
+            ['name' => 'HelpDesk', 'slug' => 'helpdesk', 'code' => 'HELPDESK', 'type' => 'web', 'source' => 'external', 'icon' => 'headphones', 'color' => '#6C757D', 'sort_order' => 6, 'description' => '24/7 multilingual support — AI chatbot, live agents, ticket tracking, and emergency assistance'],
+            ['name' => 'City Location - Digital Twin', 'slug' => 'city-digital-twin', 'code' => 'CITY_DIGITAL_TWIN', 'type' => 'hybrid', 'source' => 'internal', 'icon' => 'globe', 'color' => '#2EC4B6', 'sort_order' => 7, 'description' => 'Interactive 3D city map with AR navigation, real-time data, and virtual tours of Pattaya'],
+            ['name' => 'Social Network', 'slug' => 'social-network', 'code' => 'SOCIAL_NETWORK', 'type' => 'hybrid', 'source' => 'internal', 'icon' => 'users', 'color' => '#E71D36', 'sort_order' => 8, 'description' => 'Connect with fellow travelers — share experiences, join groups, find events, and make friends'],
+            ['name' => 'Referral & Partner Hub', 'slug' => 'partner-hub', 'code' => 'PARTNER_HUB', 'type' => 'web', 'source' => 'internal', 'icon' => 'share-2', 'color' => '#8338EC', 'sort_order' => 9, 'description' => 'Earn commissions by referring friends and merchants — influencer tools, tracking, and payouts'],
+            ['name' => 'UGC & AI Content Hub', 'slug' => 'ugc-ai-hub', 'code' => 'UGC_AI_HUB', 'type' => 'hybrid', 'source' => 'internal', 'icon' => 'edit-3', 'color' => '#3A86FF', 'sort_order' => 10, 'description' => 'AI-powered content creation — auto-translate, generate itineraries, and curate user reviews'],
         ];
 
         foreach ($apps as $app) {
@@ -234,6 +234,46 @@ class PlatformSeeder extends Seeder
                 ['name' => 'Media Library', 'slug' => 'media-lib', 'code' => 'MEDIA_LIB', 'description' => 'Asset management with AI auto-tagging and CDN', 'sort_order' => 5],
                 ['name' => 'Multi-language Engine', 'slug' => 'multi-lang', 'code' => 'MULTI_LANG', 'description' => 'AI auto-translation (TH/EN/ZH/JA/KO/RU) with TTS', 'sort_order' => 6],
                 ['name' => 'Content Curation', 'slug' => 'content-curation', 'code' => 'CONTENT_CURATION', 'description' => 'AI quality scoring, editorial picks, auto-publishing', 'sort_order' => 7],
+            ],
+            'HOTEL_MGMT' => [
+                ['name' => 'Room Management', 'slug' => 'room-mgmt', 'code' => 'ROOM_MGMT', 'description' => 'Room types, inventory, pricing, and availability calendar', 'sort_order' => 1],
+                ['name' => 'Reservations', 'slug' => 'reservations', 'code' => 'RESERVATIONS', 'description' => 'Booking management, check-in/out, and guest records', 'sort_order' => 2],
+                ['name' => 'Guest Services', 'slug' => 'guest-services', 'code' => 'GUEST_SERVICES', 'description' => 'Room service, housekeeping requests, and concierge', 'sort_order' => 3],
+                ['name' => 'Channel Manager', 'slug' => 'channel-mgr', 'code' => 'CHANNEL_MGR', 'description' => 'Sync availability across OTAs (Agoda, Booking.com, etc.)', 'sort_order' => 4],
+                ['name' => 'Revenue & Reports', 'slug' => 'revenue-reports', 'code' => 'REVENUE_REPORTS', 'description' => 'Occupancy rates, revenue analytics, and financial reports', 'sort_order' => 5],
+                ['name' => 'Review Management', 'slug' => 'review-mgmt', 'code' => 'REVIEW_MGMT', 'description' => 'Monitor and respond to guest reviews across platforms', 'sort_order' => 6],
+            ],
+            'TOUR_BOOKING' => [
+                ['name' => 'Tour Catalog', 'slug' => 'tour-catalog', 'code' => 'TOUR_CATALOG', 'description' => 'Browse tours, activities, day trips, and experiences', 'sort_order' => 1],
+                ['name' => 'Booking Engine', 'slug' => 'booking-engine', 'code' => 'BOOKING_ENGINE', 'description' => 'Real-time availability, instant booking, and payment', 'sort_order' => 2],
+                ['name' => 'Tour Operator Panel', 'slug' => 'operator-panel', 'code' => 'OPERATOR_PANEL', 'description' => 'Tour operators manage listings, schedules, and guides', 'sort_order' => 3],
+                ['name' => 'Itinerary Builder', 'slug' => 'itinerary', 'code' => 'ITINERARY', 'description' => 'Create custom multi-day itineraries with AI suggestions', 'sort_order' => 4],
+                ['name' => 'Transport & Transfers', 'slug' => 'transport', 'code' => 'TRANSPORT', 'description' => 'Airport transfers, car rentals, and local transport booking', 'sort_order' => 5],
+                ['name' => 'Reviews & Ratings', 'slug' => 'tour-reviews', 'code' => 'TOUR_REVIEWS', 'description' => 'Verified reviews and ratings from past participants', 'sort_order' => 6],
+            ],
+            'MARKETPLACE' => [
+                ['name' => 'Shop Directory', 'slug' => 'shop-directory', 'code' => 'SHOP_DIRECTORY', 'description' => 'Browse local shops, restaurants, and service providers', 'sort_order' => 1],
+                ['name' => 'Product Listings', 'slug' => 'product-listings', 'code' => 'PRODUCT_LISTINGS', 'description' => 'Search and filter products, souvenirs, and local goods', 'sort_order' => 2],
+                ['name' => 'Order & Delivery', 'slug' => 'order-delivery', 'code' => 'ORDER_DELIVERY', 'description' => 'Place orders with hotel delivery or pickup options', 'sort_order' => 3],
+                ['name' => 'Merchant Dashboard', 'slug' => 'merchant-dash', 'code' => 'MERCHANT_DASH', 'description' => 'Merchants manage products, orders, and promotions', 'sort_order' => 4],
+                ['name' => 'Deals & Coupons', 'slug' => 'deals-coupons', 'code' => 'DEALS_COUPONS', 'description' => 'Tourist-exclusive deals, flash sales, and discount codes', 'sort_order' => 5],
+                ['name' => 'Food Delivery', 'slug' => 'food-delivery', 'code' => 'FOOD_DELIVERY', 'description' => 'Order from local restaurants with real-time tracking', 'sort_order' => 6],
+            ],
+            'REWARDS' => [
+                ['name' => 'Points Dashboard', 'slug' => 'points-dashboard', 'code' => 'POINTS_DASH', 'description' => 'View balance, earning history, and point expiry dates', 'sort_order' => 1],
+                ['name' => 'Earn Points', 'slug' => 'earn-points', 'code' => 'EARN_POINTS', 'description' => 'Earn from bookings, check-ins, reviews, and referrals', 'sort_order' => 2],
+                ['name' => 'Redeem Rewards', 'slug' => 'redeem-rewards', 'code' => 'REDEEM_REWARDS', 'description' => 'Redeem for discounts, vouchers, upgrades, and experiences', 'sort_order' => 3],
+                ['name' => 'Tier & Benefits', 'slug' => 'tier-benefits', 'code' => 'TIER_BENEFITS', 'description' => 'Bronze to Platinum tiers with exclusive perks at each level', 'sort_order' => 4],
+                ['name' => 'Special Campaigns', 'slug' => 'campaigns', 'code' => 'CAMPAIGNS', 'description' => 'Limited-time bonus point events and seasonal promotions', 'sort_order' => 5],
+                ['name' => 'Transfer & Exchange', 'slug' => 'point-transfer', 'code' => 'POINT_TRANSFER', 'description' => 'Transfer points to friends or exchange across clusters', 'sort_order' => 6],
+            ],
+            'HELPDESK' => [
+                ['name' => 'AI Chatbot', 'slug' => 'ai-chatbot', 'code' => 'AI_CHATBOT', 'description' => 'Instant AI-powered answers in 6 languages, 24/7', 'sort_order' => 1],
+                ['name' => 'Live Support', 'slug' => 'live-support', 'code' => 'LIVE_SUPPORT', 'description' => 'Connect with multilingual human agents for complex issues', 'sort_order' => 2],
+                ['name' => 'Ticket System', 'slug' => 'ticket-system', 'code' => 'TICKET_SYSTEM', 'description' => 'Submit and track support tickets with SLA guarantees', 'sort_order' => 3],
+                ['name' => 'Emergency Assist', 'slug' => 'emergency', 'code' => 'EMERGENCY', 'description' => 'One-tap emergency contacts: police, hospital, embassy', 'sort_order' => 4],
+                ['name' => 'FAQ & Guides', 'slug' => 'faq-guides', 'code' => 'FAQ_GUIDES', 'description' => 'Travel guides, visa info, local tips, and how-to articles', 'sort_order' => 5],
+                ['name' => 'Feedback & Surveys', 'slug' => 'feedback', 'code' => 'FEEDBACK', 'description' => 'Rate your experience and help us improve our services', 'sort_order' => 6],
             ],
         ];
 
