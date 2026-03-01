@@ -2,6 +2,7 @@
     $navItems = [
         ['label' => 'Dashboard', 'route' => 'admin.dashboard', 'icon' => 'chart-bar'],
         ['label' => 'Applications', 'route' => 'admin.applications', 'icon' => 'cube'],
+        ['label' => 'API Reference', 'route' => 'admin.api-reference', 'icon' => 'code-bracket'],
     ];
 @endphp
 

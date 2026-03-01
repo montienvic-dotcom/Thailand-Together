@@ -77,6 +77,11 @@ class AdminWebController extends Controller
         return view('admin.permissions.roles', compact('roles'));
     }
 
+    public function apiReference()
+    {
+        return view('admin.api-reference');
+    }
+
     public function loginForm()
     {
         return view('admin.login');
