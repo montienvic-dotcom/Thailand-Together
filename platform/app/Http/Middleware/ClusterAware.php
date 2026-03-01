@@ -23,10 +23,15 @@ class ClusterAware
         $cluster = $this->resolveCluster($request);
 
         if (!$cluster) {
-            return response()->json([
-                'error' => 'Cluster not found or inactive',
-                'message' => 'Please specify a valid cluster via X-Cluster-Id header, cluster parameter, or subdomain.',
-            ], 400);
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'error' => 'Cluster not found or inactive',
+                    'message' => 'Please specify a valid cluster via X-Cluster-Id header, cluster parameter, or subdomain.',
+                ], 400);
+            }
+
+            return redirect()->route('superapp.landing')
+                ->with('error', 'Please select a cluster.');
         }
 
         $this->clusterManager->setCluster($cluster);
