@@ -52,6 +52,11 @@ class SuperAppWebController extends Controller
         return view('superapp.app-detail', compact('cluster', 'app', 'modules'));
     }
 
+    public function apiDocs()
+    {
+        return view('superapp.api-docs');
+    }
+
     public function loginForm()
     {
         return view('superapp.login');

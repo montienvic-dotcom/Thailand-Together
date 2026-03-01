@@ -6,6 +6,9 @@ use Illuminate\Support\Facades\Route;
 // Landing / Cluster selector (no auth)
 Route::get('/', [SuperAppWebController::class, 'landing'])->name('superapp.landing');
 
+// Public pages (no auth)
+Route::get('/api-docs', [SuperAppWebController::class, 'apiDocs'])->name('superapp.api-docs');
+
 // Auth routes
 Route::get('/login', [SuperAppWebController::class, 'loginForm'])->name('login');
 Route::post('/login', [SuperAppWebController::class, 'login'])->name('login.submit');

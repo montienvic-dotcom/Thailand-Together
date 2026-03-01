@@ -45,6 +45,14 @@
                     <p class="text-sm font-medium text-gray-900">{{ auth()->user()->name ?? 'User' }}</p>
                     <p class="text-xs text-gray-500">{{ auth()->user()->email ?? '' }}</p>
                 </div>
+                <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg">
+                    <x-icon name="cog" class="w-4 h-4 text-gray-400" />
+                    Admin Panel
+                </a>
+                <a href="{{ route('superapp.api-docs') }}" class="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg">
+                    <x-icon name="code-bracket" class="w-4 h-4 text-gray-400" />
+                    API Reference
+                </a>
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit" class="w-full text-left px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg">
