@@ -1,0 +1,141 @@
+name: Deploy to Hostinger
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  PHP_VERSION: '8.2'
+  NODE_VERSION: '20'
+  DEPLOY_PATH: '~/thailandtogether'
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: mbstring, xml, ctype, json, bcmath, curl, sqlite3
+          coverage: none
+
+      - name: Install Composer dependencies
+        working-directory: platform
+        run: composer install --prefer-dist --no-progress
+
+      - name: Prepare test environment
+        working-directory: platform
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+          touch database/database.sqlite
+          php artisan migrate --force
+
+      - name: Run tests
+        working-directory: platform
+        run: php artisan test
+
+  deploy:
+    name: Deploy to Production
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: mbstring, xml, ctype, json, bcmath, curl
+          coverage: none
+
+      - name: Install Composer dependencies (production)
+        working-directory: platform
+        run: composer install --no-dev --optimize-autoloader --no-progress
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: platform/package-lock.json
+
+      - name: Build frontend assets
+        working-directory: platform
+        run: |
+          npm ci
+          npm run build
+
+      - name: Prepare deployment package
+        run: |
+          # Remove files not needed in production
+          rm -rf platform/node_modules
+          rm -rf platform/tests
+          rm -rf platform/.env
+          rm -rf platform/.env.example
+          rm -rf platform/storage/logs/*.log
+          rm -f platform/database/database.sqlite
+
+      - name: Deploy via rsync
+        uses: burnett01/rsync-deployments@7.0.1
+        with:
+          switches: >-
+            -avzr --delete
+            --exclude='.env'
+            --exclude='storage/app/public/'
+            --exclude='storage/logs/'
+            --exclude='storage/framework/sessions/'
+            --exclude='storage/framework/cache/data/'
+            --exclude='storage/framework/views/'
+            --exclude='node_modules/'
+            --exclude='.git/'
+            --exclude='database/database.sqlite'
+          path: platform/
+          remote_path: ${{ env.DEPLOY_PATH }}/
+          remote_host: ${{ secrets.SSH_HOST }}
+          remote_user: ${{ secrets.SSH_USER }}
+          remote_key: ${{ secrets.SSH_PRIVATE_KEY }}
+          remote_port: ${{ secrets.SSH_PORT }}
+
+      - name: Run post-deploy commands
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            cd ${{ env.DEPLOY_PATH }}
+
+            # Ensure storage directories exist
+            mkdir -p storage/logs
+            mkdir -p storage/framework/{sessions,views,cache/data}
+            mkdir -p storage/app/public
+            mkdir -p bootstrap/cache
+
+            # Set permissions
+            chmod -R 775 storage bootstrap/cache
+
+            # Run migrations
+            php artisan migrate --force
+
+            # Cache configuration for performance
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
+            php artisan event:cache
+
+            # Create storage symlink (in public_html)
+            php artisan storage:link 2>/dev/null || true
+
+            # Restart queue workers if running
+            php artisan queue:restart 2>/dev/null || true
+
+            echo "✅ Deployment completed successfully!"

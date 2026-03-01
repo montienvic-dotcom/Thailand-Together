@@ -9,6 +9,16 @@ platform/storage/framework/sessions/*
 platform/storage/framework/views/*
 platform/bootstrap/cache/*
 
+# Build output (committed by CI, not locally)
+platform/public/build/
+platform/public/hot
+
 # OS
 .DS_Store
 Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
