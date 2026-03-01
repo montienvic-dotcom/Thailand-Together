@@ -19,6 +19,11 @@ class PlatformSeeder extends Seeder
 {
     public function run(): void
     {
+        // Skip if already seeded (safe for repeated deploys)
+        if (DB::table('users')->count() > 0) {
+            return;
+        }
+
         // ── Countries ──
         $thailandId = DB::table('countries')->insertGetId([
             'name' => 'Thailand',

@@ -133,8 +133,9 @@ jobs:
               php artisan key:generate --force
             fi
 
-            # Run migrations
+            # Run migrations and seed
             php artisan migrate --force
+            php artisan db:seed --force
 
             # Cache configuration for performance
             php artisan config:cache
