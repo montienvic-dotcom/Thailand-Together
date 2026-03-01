@@ -107,11 +107,14 @@ jobs:
 
       - name: Run post-deploy commands
         uses: appleboy/ssh-action@v1.2.0
+        env:
+          ENV_FILE: ${{ secrets.ENV_FILE }}
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
+          envs: ENV_FILE
           script: |
             cd ${{ env.DEPLOY_PATH }}
 
@@ -123,6 +126,12 @@ jobs:
 
             # Set permissions
             chmod -R 775 storage bootstrap/cache
+
+            # Create .env from GitHub Secret if not exists
+            if [ ! -f ".env" ]; then
+              echo "$ENV_FILE" > .env
+              php artisan key:generate --force
+            fi
 
             # Run migrations
             php artisan migrate --force
@@ -154,20 +163,22 @@ jobs:
               fi
             done
 
-            # Ensure bridge index.php exists
-            if [ ! -f "${{ env.PUBLIC_HTML }}/index.php" ]; then
-              cat > "${{ env.PUBLIC_HTML }}/index.php" << 'PHPEOF'
+            # Always update bridge index.php (Laravel 11 pattern)
+            cat > "${{ env.PUBLIC_HTML }}/index.php" << 'PHPEOF'
             <?php
+            use Illuminate\Http\Request;
+
             define('LARAVEL_START', microtime(true));
             $appDir = getenv('HOME') . '/pattayatogether';
+
+            if (file_exists($maintenance = $appDir . '/storage/framework/maintenance.php')) {
+                require $maintenance;
+            }
+
             require $appDir . '/vendor/autoload.php';
             $app = require_once $appDir . '/bootstrap/app.php';
-            $kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
-            $response = $kernel->handle($request = Illuminate\Http\Request::capture());
-            $response->send();
-            $kernel->terminate($request, $response);
+            $app->handleRequest(Request::capture());
             PHPEOF
-            fi
 
             # Ensure .htaccess exists
             if [ ! -f "${{ env.PUBLIC_HTML }}/.htaccess" ]; then
