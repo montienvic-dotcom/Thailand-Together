@@ -16,9 +16,9 @@ GitHub Actions CI/CD
             │
             ▼
 Hostinger Cloud Hosting
-    ~/thailandtogether/          ← Laravel app
-    ~/domains/thailandtogether.net/
-        public_html/ → ~/thailandtogether/public/  (symlink)
+    ~/pattayatogether/          ← Laravel app
+    ~/domains/platform.pattayatogether.com/
+        public_html/ → ~/pattayatogether/public/  (symlink)
 ```
 
 ---
@@ -27,12 +27,12 @@ Hostinger Cloud Hosting
 
 ### Step 1: Prepare Hostinger
 
-1. **Login to hPanel** → thailandtogether.net
+1. **Login to hPanel** → platform.pattayatogether.com
 
 2. **Create MySQL Database** via hPanel → Databases:
-   - Database name: `u1234_thailand` (example)
-   - Username: `u1234_admin` (example)
-   - Password: (generate strong password)
+   - Database name: `u504097778_platform`
+   - Username: `u504097778_platform`
+   - Password: (your password)
    - Note these credentials for .env
 
 3. **Enable SSH Access** via hPanel → Advanced → SSH Access
@@ -43,7 +43,7 @@ Hostinger Cloud Hosting
 
 ```bash
 # Generate SSH key (on your local machine)
-ssh-keygen -t ed25519 -C "deploy@thailandtogether" -f ~/.ssh/hostinger_deploy
+ssh-keygen -t ed25519 -C "deploy@pattayatogether" -f ~/.ssh/hostinger_deploy
 
 # Copy public key to Hostinger
 # hPanel → Advanced → SSH Keys → Add New
@@ -51,17 +51,17 @@ cat ~/.ssh/hostinger_deploy.pub
 # Paste the output into hPanel
 
 # Test connection
-ssh -p 65002 u123456789@your-server-ip
+ssh -p 65002 u504097778@46.202.187.217
 ```
 
 ### Step 3: Run Initial Setup on Server
 
 ```bash
 # SSH into Hostinger
-ssh -p 65002 u123456789@your-server-ip
+ssh -p 65002 u504097778@46.202.187.217
 
 # Create the setup script (or upload it)
-mkdir -p ~/thailandtogether
+mkdir -p ~/pattayatogether
 # Copy scripts/setup-hostinger.sh content and run it
 bash setup-hostinger.sh
 ```
@@ -69,12 +69,12 @@ bash setup-hostinger.sh
 ### Step 4: Configure .env on Server
 
 ```bash
-ssh -p 65002 u123456789@your-server-ip
-nano ~/thailandtogether/.env
+ssh -p 65002 u504097778@46.202.187.217
+nano ~/pattayatogether/.env
 
 # Fill in your MySQL credentials:
-# DB_DATABASE=u1234_thailand
-# DB_USERNAME=u1234_admin
+# DB_DATABASE=u504097778_platform
+# DB_USERNAME=u504097778_platform
 # DB_PASSWORD=your_password
 ```
 
@@ -84,8 +84,8 @@ Go to your GitHub repo → Settings → Secrets and variables → Actions:
 
 | Secret Name       | Value                              | Description              |
 | ----------------- | ---------------------------------- | ------------------------ |
-| `SSH_HOST`        | `your-server-ip`                   | Hostinger server IP      |
-| `SSH_USER`        | `u123456789`                       | SSH username from hPanel |
+| `SSH_HOST`        | `46.202.187.217`                   | Hostinger server IP      |
+| `SSH_USER`        | `u504097778`                       | SSH username from hPanel |
 | `SSH_PRIVATE_KEY` | contents of `hostinger_deploy` key | Private key (not .pub)   |
 | `SSH_PORT`        | `65002`                            | Hostinger SSH port       |
 
@@ -97,7 +97,7 @@ cat ~/.ssh/hostinger_deploy
 
 ### Step 6: Enable SSL
 
-hPanel → SSL → Install free SSL certificate for thailandtogether.net
+hPanel → SSL → Install free SSL certificate for platform.pattayatogether.com
 
 ### Step 7: First Deploy
 
@@ -110,8 +110,8 @@ git push origin main
 After first deploy, SSH in and generate the app key:
 
 ```bash
-ssh -p 65002 u123456789@your-server-ip
-cd ~/thailandtogether
+ssh -p 65002 u504097778@46.202.187.217
+cd ~/pattayatogether
 php artisan key:generate
 php artisan migrate --force
 ```
@@ -147,10 +147,10 @@ If you need to deploy manually (without pushing to GitHub):
 
 ```bash
 # SSH into server
-ssh -p 65002 u123456789@your-server-ip
+ssh -p 65002 u504097778@46.202.187.217
 
 # Run deploy script
-bash ~/thailandtogether/scripts/deploy-server.sh
+bash ~/pattayatogether/scripts/deploy-server.sh
 ```
 
 ---
@@ -159,19 +159,19 @@ bash ~/thailandtogether/scripts/deploy-server.sh
 
 ### Check if site is up
 ```bash
-curl -I https://thailandtogether.net
+curl -I https://platform.pattayatogether.com
 ```
 
 ### View logs on server
 ```bash
-ssh -p 65002 u123456789@your-server-ip
-tail -50 ~/thailandtogether/storage/logs/laravel.log
+ssh -p 65002 u504097778@46.202.187.217
+tail -50 ~/pattayatogether/storage/logs/laravel.log
 ```
 
 ### Clear all caches
 ```bash
-ssh -p 65002 u123456789@your-server-ip
-cd ~/thailandtogether
+ssh -p 65002 u504097778@46.202.187.217
+cd ~/pattayatogether
 php artisan cache:clear
 php artisan config:clear
 php artisan route:clear
@@ -208,7 +208,7 @@ If your app uses Laravel's task scheduler, set up cron on Hostinger:
 hPanel → Advanced → Cron Jobs:
 
 ```
-* * * * * cd ~/thailandtogether && php artisan schedule:run >> /dev/null 2>&1
+* * * * * cd ~/pattayatogether && php artisan schedule:run >> /dev/null 2>&1
 ```
 
 ---
@@ -216,12 +216,12 @@ hPanel → Advanced → Cron Jobs:
 ## Directory Structure on Hostinger
 
 ```
-/home/u123456789/
+/home/u504097778/
 ├── domains/
-│   └── thailandtogether.net/
-│       └── public_html/ → ~/thailandtogether/public  (symlink)
+│   └── platform.pattayatogether.com/
+│       └── public_html/ → ~/pattayatogether/public  (symlink)
 │
-├── thailandtogether/            ← Laravel application
+├── pattayatogether/            ← Laravel application
 │   ├── app/
 │   ├── bootstrap/
 │   ├── config/

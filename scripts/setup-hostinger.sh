@@ -11,8 +11,8 @@
 
 set -e
 
-DOMAIN="thailandtogether.net"
-APP_DIR="$HOME/thailandtogether"
+DOMAIN="platform.pattayatogether.com"
+APP_DIR="$HOME/pattayatogether"
 PUBLIC_HTML="$HOME/domains/$DOMAIN/public_html"
 
 echo "================================================"
@@ -32,7 +32,7 @@ if [ -d "$PUBLIC_HTML" ] && [ ! -L "$PUBLIC_HTML" ]; then
     mv "$PUBLIC_HTML" "${PUBLIC_HTML}_backup_$(date +%Y%m%d_%H%M%S)"
 fi
 
-# Create symlink: public_html -> thailandtogether/public
+# Create symlink: public_html -> pattayatogether/public
 ln -sf "$APP_DIR/public" "$PUBLIC_HTML"
 echo "   ✅ public_html → $APP_DIR/public"
 
@@ -45,7 +45,7 @@ APP_NAME="Thailand Together"
 APP_ENV=production
 APP_KEY=
 APP_DEBUG=false
-APP_URL=https://thailandtogether.net
+APP_URL=https://platform.pattayatogether.com
 
 APP_LOCALE=en
 APP_FALLBACK_LOCALE=en
@@ -70,7 +70,7 @@ SESSION_DRIVER=database
 SESSION_LIFETIME=120
 SESSION_ENCRYPT=true
 SESSION_PATH=/
-SESSION_DOMAIN=thailandtogether.net
+SESSION_DOMAIN=platform.pattayatogether.com
 SESSION_SECURE_COOKIE=true
 
 BROADCAST_CONNECTION=log
@@ -81,10 +81,10 @@ CACHE_STORE=database
 MAIL_MAILER=smtp
 MAIL_HOST=smtp.hostinger.com
 MAIL_PORT=465
-MAIL_USERNAME=info@thailandtogether.net
+MAIL_USERNAME=info@pattayatogether.com
 MAIL_PASSWORD=
 MAIL_ENCRYPTION=ssl
-MAIL_FROM_ADDRESS="info@thailandtogether.net"
+MAIL_FROM_ADDRESS="info@pattayatogether.com"
 MAIL_FROM_NAME="${APP_NAME}"
 
 VITE_APP_NAME="${APP_NAME}"

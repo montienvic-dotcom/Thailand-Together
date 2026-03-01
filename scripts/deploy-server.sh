@@ -3,13 +3,13 @@
 # Thailand Together - Server Deploy Script
 # Run on Hostinger after code is synced
 #
-# Usage: bash ~/thailandtogether/scripts/deploy-server.sh
+# Usage: bash ~/pattayatogether/scripts/deploy-server.sh
 ###############################################
 
 set -e
 
-APP_DIR="$HOME/thailandtogether"
-DOMAIN="thailandtogether.net"
+APP_DIR="$HOME/pattayatogether"
+DOMAIN="platform.pattayatogether.com"
 PUBLIC_HTML="$HOME/domains/$DOMAIN/public_html"
 
 echo "🚀 Starting deployment..."
