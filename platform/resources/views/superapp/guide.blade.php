@@ -214,7 +214,7 @@
                     </div>
                     <div class="bg-gray-50 rounded-lg p-2">
                         <p class="font-mono text-gray-500">/cluster/pattaya</p>
-                        <p class="text-gray-600 mt-1">ดู 10 แอป<br>ใน Pattaya</p>
+                        <p class="text-gray-600 mt-1">ดู 13 แอป<br>ใน Pattaya</p>
                     </div>
                     <div class="bg-gray-50 rounded-lg p-2">
                         <p class="font-mono text-gray-500">/cluster/pattaya/app/1</p>
@@ -290,6 +290,9 @@
                             ['name' => 'CRM', 'type' => 'web', 'color' => 'indigo'],
                             ['name' => 'HelpDesk', 'type' => 'web', 'color' => 'amber'],
                             ['name' => 'AI Services', 'type' => 'web', 'color' => 'violet'],
+                            ['name' => 'City Dashboard', 'type' => 'web', 'color' => 'sky'],
+                            ['name' => 'Gov ERP (GFMIS)', 'type' => 'web', 'color' => 'teal'],
+                            ['name' => 'Event & MICE', 'type' => 'hybrid', 'color' => 'pink'],
                         ];
                     @endphp
                     @foreach($demoApps as $dApp)
@@ -366,7 +369,7 @@
                         <div>
                             <h4 class="font-semibold text-sm text-gray-900">Applications Management</h4>
                             <p class="text-xs text-gray-500">
-                                ดูรายการแอปทั้งหมด (10 apps) พร้อมข้อมูล: ชื่อ, รหัส, ประเภท (web/mobile/hybrid), จำนวน Modules<br>
+                                ดูรายการแอปทั้งหมด (13 apps) พร้อมข้อมูล: ชื่อ, รหัส, ประเภท (web/mobile/hybrid), จำนวน Modules<br>
                                 คลิกเข้าดูรายละเอียดแต่ละ App — เห็น Modules ทั้งหมดพร้อมสถานะ Active/Inactive
                             </p>
                         </div>
@@ -568,7 +571,7 @@
         <div id="apps" class="mb-12">
             <div class="flex items-center gap-3 mb-4">
                 <span class="flex items-center justify-center w-8 h-8 rounded-full bg-orange-100 text-orange-600 font-bold text-sm">6</span>
-                <h2 class="text-xl font-bold text-gray-900">10 Applications / แอปพลิเคชันทั้ง 10 ตัว</h2>
+                <h2 class="text-xl font-bold text-gray-900">13 Applications / แอปพลิเคชันทั้ง 13 ตัว</h2>
             </div>
 
             <div class="space-y-3">
@@ -653,6 +656,30 @@
                             'color' => 'violet',
                             'desc' => 'ศูนย์บริการ AI — Chatbot แปลภาษา TTS Call Center',
                             'modules' => ['AI Chatbot', 'Translation Engine', 'Text-to-Speech', 'AI Call Center', 'Recommendation Engine'],
+                        ],
+                        [
+                            'name' => 'City Dashboard',
+                            'code' => 'CITY_DASHBOARD',
+                            'type' => 'Web Application',
+                            'color' => 'sky',
+                            'desc' => 'แดชบอร์ดเมืองอัจฉริยะ — สถิตินักท่องเที่ยว การจราจร รายได้ ความปลอดภัย สิ่งแวดล้อม',
+                            'modules' => ['Tourism Statistics', 'Traffic & Mobility', 'Revenue & Tax Monitor', 'Public Safety Monitor', 'Environmental Monitor', 'Business Intelligence', 'Citizen Feedback'],
+                        ],
+                        [
+                            'name' => 'Government ERP (NEW GFMIS)',
+                            'code' => 'GOV_ERP',
+                            'type' => 'Web Application',
+                            'color' => 'teal',
+                            'desc' => 'ระบบ ERP ภาครัฐ — งบประมาณ จัดซื้อจัดจ้าง บัญชี สินทรัพย์ บุคลากร เอกสาร ตรวจสอบ',
+                            'modules' => ['Budget Management', 'Procurement & e-GP', 'Financial Reporting', 'Asset Management', 'HR & Payroll', 'Document Management', 'Audit & Compliance'],
+                        ],
+                        [
+                            'name' => 'Event & MICE',
+                            'code' => 'EVENT_MICE',
+                            'type' => 'Hybrid',
+                            'color' => 'pink',
+                            'desc' => 'จัดการอีเวนต์และ MICE — Meetings, Incentives, Conferences, Exhibitions ครบวงจร',
+                            'modules' => ['Event Management', 'Venue Booking', 'MICE Planner', 'Ticket & Registration', 'Exhibitor Portal', 'Attendee Engagement', 'Event Analytics'],
                         ],
                     ];
                 @endphp

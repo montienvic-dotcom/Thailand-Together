@@ -53,7 +53,7 @@
                             <x-icon name="server" class="w-5 h-5 text-blue-600" />
                             <h4 class="font-semibold text-gray-900">Pillar 2: Supporting Systems</h4>
                         </div>
-                        <p class="text-xs text-gray-600">Laravel-based backend: Admin Panel, Hotel Management, Tour Booking, Marketplace, CRM, HelpDesk, and more.</p>
+                        <p class="text-xs text-gray-600">Laravel-based backend: Admin Panel, Hotel Management, Tour Booking, Marketplace, CRM, HelpDesk, City Dashboard, Government ERP (GFMIS), Event & MICE, and more.</p>
                     </div>
                     <div class="bg-purple-50 rounded-lg p-4 border border-purple-100">
                         <div class="flex items-center gap-2 mb-2">
@@ -88,7 +88,7 @@
                     <div class="flex items-center gap-3 bg-gray-50 rounded-lg px-4 py-3 ml-12">
                         <span class="text-xs font-bold text-white bg-orange-600 rounded px-2 py-0.5">L3</span>
                         <span class="font-medium text-sm text-gray-900">Application</span>
-                        <span class="text-xs text-gray-500">— App Together, Hotel Mgmt, Tour Booking, ...</span>
+                        <span class="text-xs text-gray-500">— App Together, Hotel Mgmt, Tour Booking, City Dashboard, Gov ERP, Event & MICE, ...</span>
                     </div>
                     <div class="flex items-center gap-3 bg-gray-50 rounded-lg px-4 py-3 ml-16">
                         <span class="text-xs font-bold text-white bg-purple-600 rounded px-2 py-0.5">L4</span>
@@ -123,7 +123,7 @@
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
                     <div class="bg-gray-50 rounded-lg p-3 text-center">
                         <p class="text-sm font-bold text-gray-900">SaaS</p>
-                        <p class="text-xs text-gray-500 mt-1">App Together, Admin Panel, Hotel Mgmt, CRM (per cluster)</p>
+                        <p class="text-xs text-gray-500 mt-1">App Together, Admin Panel, Hotel Mgmt, CRM, City Dashboard, Gov ERP, Event & MICE (per cluster)</p>
                     </div>
                     <div class="bg-gray-50 rounded-lg p-3 text-center">
                         <p class="text-sm font-bold text-gray-900">IaaS</p>
