@@ -166,6 +166,9 @@ class PermissionController extends Controller
             }
         });
 
+        // Clear permission cache for all users in this group
+        $this->permissionResolver->clearGroupCache($groupId);
+
         return response()->json(['message' => 'Group access updated successfully']);
     }
 

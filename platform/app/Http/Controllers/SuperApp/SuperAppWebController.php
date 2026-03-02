@@ -57,6 +57,11 @@ class SuperAppWebController extends Controller
         return view('superapp.api-docs');
     }
 
+    public function guide()
+    {
+        return view('superapp.guide');
+    }
+
     public function loginForm()
     {
         return view('superapp.login');

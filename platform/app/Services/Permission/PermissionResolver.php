@@ -4,7 +4,9 @@ namespace App\Services\Permission;
 
 use App\Models\Auth\User;
 use App\Models\Global\Cluster;
+use Illuminate\Cache\TaggableStore;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Central permission resolver.
@@ -15,19 +17,29 @@ use Illuminate\Support\Facades\Cache;
  * 1. User-specific override
  * 2. Group-level access
  * 3. Role-based access
+ *
+ * Cache strategy:
+ * - When the cache driver supports tags (Redis, Memcached): uses Cache::tags()
+ *   for efficient bulk invalidation per user.
+ * - When tags are not supported (database, file, array): uses a generation
+ *   counter embedded in cache keys. Incrementing the generation invalidates
+ *   all previous entries (they expire naturally via TTL).
  */
 class PermissionResolver
 {
     private const CACHE_TTL = 300; // 5 minutes
+
+    private ?bool $tagSupport = null;
 
     /**
      * Check if a user can access a specific module in a cluster.
      */
     public function canAccess(User $user, int $clusterId, int $applicationId, ?int $moduleId = null): bool
     {
-        $cacheKey = "perm:{$user->id}:{$clusterId}:{$applicationId}:" . ($moduleId ?? 'null');
+        $suffix = "{$clusterId}:{$applicationId}:" . ($moduleId ?? 'null');
+        $cacheKey = $this->buildKey($user->id, "perm:{$suffix}");
 
-        return Cache::tags(["user_perms:{$user->id}"])->remember($cacheKey, self::CACHE_TTL, function () use ($user, $clusterId, $applicationId, $moduleId) {
+        return $this->remember($user->id, $cacheKey, function () use ($user, $clusterId, $applicationId, $moduleId) {
             // Step 1: Admin shortcut
             if ($user->isClusterAdmin($clusterId)) {
                 return true;
@@ -53,9 +65,9 @@ class PermissionResolver
      */
     public function getAccessMap(User $user, int $clusterId): array
     {
-        $cacheKey = "access_map:{$user->id}:{$clusterId}";
+        $cacheKey = $this->buildKey($user->id, "access_map:{$clusterId}");
 
-        return Cache::tags(["user_perms:{$user->id}"])->remember($cacheKey, self::CACHE_TTL, function () use ($user, $clusterId) {
+        return $this->remember($user->id, $cacheKey, function () use ($user, $clusterId) {
             $appIds = $user->accessibleAppIds($clusterId);
             $moduleIds = $user->accessibleModuleIds($clusterId);
 
@@ -77,9 +89,9 @@ class PermissionResolver
      */
     public function accessibleClusters(User $user): array
     {
-        $cacheKey = "clusters:{$user->id}";
+        $cacheKey = $this->buildKey($user->id, 'clusters');
 
-        return Cache::tags(["user_perms:{$user->id}"])->remember($cacheKey, self::CACHE_TTL, function () use ($user) {
+        return $this->remember($user->id, $cacheKey, function () use ($user) {
             if ($user->isGlobalAdmin()) {
                 return Cluster::active()->pluck('id')->toArray();
             }
@@ -99,7 +111,7 @@ class PermissionResolver
                 ->pluck('id');
 
             // Clusters from app access
-            $appClusters = \Illuminate\Support\Facades\DB::table('user_app_access')
+            $appClusters = DB::table('user_app_access')
                 ->where('user_id', $user->id)
                 ->where('has_access', true)
                 ->pluck('cluster_id');
@@ -108,7 +120,7 @@ class PermissionResolver
             $groupIds = $user->groups()->pluck('groups.id');
             $groupClusters = collect();
             if ($groupIds->isNotEmpty()) {
-                $groupClusters = \Illuminate\Support\Facades\DB::table('group_app_access')
+                $groupClusters = DB::table('group_app_access')
                     ->whereIn('group_id', $groupIds)
                     ->where('has_access', true)
                     ->pluck('cluster_id');
@@ -129,6 +141,64 @@ class PermissionResolver
      */
     public function clearCache(User $user): void
     {
-        Cache::tags(["user_perms:{$user->id}"])->flush();
+        if ($this->supportsTags()) {
+            Cache::tags(["user_perms:{$user->id}"])->flush();
+
+            return;
+        }
+
+        // Increment generation — old keys become stale and expire via TTL
+        $gen = (int) Cache::get($this->generationKey($user->id), 0);
+        Cache::forever($this->generationKey($user->id), $gen + 1);
+    }
+
+    /**
+     * Clear permission cache for all users in a group.
+     */
+    public function clearGroupCache(int $groupId): void
+    {
+        $userIds = DB::table('group_user')
+            ->where('group_id', $groupId)
+            ->pluck('user_id');
+
+        foreach ($userIds as $userId) {
+            $this->clearCache(User::find($userId));
+        }
+    }
+
+    // ── Private helpers ──
+
+    private function supportsTags(): bool
+    {
+        if ($this->tagSupport === null) {
+            $this->tagSupport = Cache::getStore() instanceof TaggableStore;
+        }
+
+        return $this->tagSupport;
+    }
+
+    private function generationKey(int $userId): string
+    {
+        return "perm_gen:{$userId}";
+    }
+
+    private function buildKey(int $userId, string $suffix): string
+    {
+        if ($this->supportsTags()) {
+            return $suffix;
+        }
+
+        $gen = (int) Cache::get($this->generationKey($userId), 0);
+
+        return "perm:v{$gen}:{$userId}:{$suffix}";
+    }
+
+    private function remember(int $userId, string $cacheKey, \Closure $callback): mixed
+    {
+        if ($this->supportsTags()) {
+            return Cache::tags(["user_perms:{$userId}"])->remember($cacheKey, self::CACHE_TTL, $callback);
+        }
+
+        return Cache::remember($cacheKey, self::CACHE_TTL, $callback);
     }
 }

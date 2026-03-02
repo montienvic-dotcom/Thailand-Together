@@ -3,6 +3,7 @@
         ['label' => 'Dashboard', 'route' => 'admin.dashboard', 'icon' => 'chart-bar'],
         ['label' => 'Applications', 'route' => 'admin.applications', 'icon' => 'cube'],
         ['label' => 'API Reference', 'route' => 'admin.api-reference', 'icon' => 'code-bracket'],
+        ['label' => 'Roadmap', 'route' => 'admin.roadmap', 'icon' => 'clipboard-document-list'],
     ];
 @endphp
 

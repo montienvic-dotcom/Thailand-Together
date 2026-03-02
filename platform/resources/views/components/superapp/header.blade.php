@@ -53,6 +53,10 @@
                     <x-icon name="code-bracket" class="w-4 h-4 text-gray-400" />
                     API Reference
                 </a>
+                <a href="{{ route('superapp.guide') }}" class="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg">
+                    <x-icon name="book-open" class="w-4 h-4 text-gray-400" />
+                    User Guide
+                </a>
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit" class="w-full text-left px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg">
