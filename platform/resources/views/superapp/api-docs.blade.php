@@ -53,7 +53,7 @@
                             <x-icon name="server" class="w-5 h-5 text-blue-600" />
                             <h4 class="font-semibold text-gray-900">Pillar 2: Supporting Systems</h4>
                         </div>
-                        <p class="text-xs text-gray-600">Laravel-based backend: Admin Panel, Hotel Management, Tour Booking, Marketplace, CRM, HelpDesk, City Dashboard, Government ERP (GFMIS), Event & MICE, and more.</p>
+                        <p class="text-xs text-gray-600">Laravel-based backend: Admin Panel, Hotel Management, Tour Booking, Marketplace, CRM, HelpDesk, City Dashboard, Government ERP (GFMIS), Event & MICE, Project Management, Data Exchange, and more.</p>
                     </div>
                     <div class="bg-purple-50 rounded-lg p-4 border border-purple-100">
                         <div class="flex items-center gap-2 mb-2">
@@ -88,7 +88,7 @@
                     <div class="flex items-center gap-3 bg-gray-50 rounded-lg px-4 py-3 ml-12">
                         <span class="text-xs font-bold text-white bg-orange-600 rounded px-2 py-0.5">L3</span>
                         <span class="font-medium text-sm text-gray-900">Application</span>
-                        <span class="text-xs text-gray-500">— App Together, Hotel Mgmt, Tour Booking, City Dashboard, Gov ERP, Event & MICE, ...</span>
+                        <span class="text-xs text-gray-500">— App Together, Hotel Mgmt, Tour Booking, City Dashboard, Gov ERP, Event & MICE, Project Mgmt, Data Exchange, ...</span>
                     </div>
                     <div class="flex items-center gap-3 bg-gray-50 rounded-lg px-4 py-3 ml-16">
                         <span class="text-xs font-bold text-white bg-purple-600 rounded px-2 py-0.5">L4</span>
@@ -123,7 +123,7 @@
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
                     <div class="bg-gray-50 rounded-lg p-3 text-center">
                         <p class="text-sm font-bold text-gray-900">SaaS</p>
-                        <p class="text-xs text-gray-500 mt-1">App Together, Admin Panel, Hotel Mgmt, CRM, City Dashboard, Gov ERP, Event & MICE (per cluster)</p>
+                        <p class="text-xs text-gray-500 mt-1">App Together, Admin Panel, Hotel Mgmt, CRM, City Dashboard, Gov ERP, Event & MICE, Project Mgmt, Data Exchange (per cluster)</p>
                     </div>
                     <div class="bg-gray-50 rounded-lg p-3 text-center">
                         <p class="text-sm font-bold text-gray-900">IaaS</p>
@@ -503,6 +503,19 @@
                         </div>
                     </div>
                     <p class="text-xs text-gray-500">OAuth2, JWT, RBAC — cluster-aware auth</p>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center">
+                            <x-icon name="currency-dollar" class="w-5 h-5 text-amber-600" />
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-sm text-gray-900">Currency Exchange API</h4>
+                            <x-ui.badge color="green">Ready</x-ui.badge>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500">Real-time exchange rates, multi-currency conversion (THB, USD, EUR, JPY, CNY, KRW, VND), transaction history</p>
                 </div>
             </div>
         </div>

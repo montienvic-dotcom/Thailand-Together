@@ -214,7 +214,7 @@
                     </div>
                     <div class="bg-gray-50 rounded-lg p-2">
                         <p class="font-mono text-gray-500">/cluster/pattaya</p>
-                        <p class="text-gray-600 mt-1">ดู 13 แอป<br>ใน Pattaya</p>
+                        <p class="text-gray-600 mt-1">ดู 15 แอป<br>ใน Pattaya</p>
                     </div>
                     <div class="bg-gray-50 rounded-lg p-2">
                         <p class="font-mono text-gray-500">/cluster/pattaya/app/1</p>
@@ -293,6 +293,8 @@
                             ['name' => 'City Dashboard', 'type' => 'web', 'color' => 'sky'],
                             ['name' => 'Gov ERP (GFMIS)', 'type' => 'web', 'color' => 'teal'],
                             ['name' => 'Event & MICE', 'type' => 'hybrid', 'color' => 'pink'],
+                            ['name' => 'Project Management', 'type' => 'web', 'color' => 'violet'],
+                            ['name' => 'Data Exchange', 'type' => 'web', 'color' => 'emerald'],
                         ];
                     @endphp
                     @foreach($demoApps as $dApp)
@@ -369,7 +371,7 @@
                         <div>
                             <h4 class="font-semibold text-sm text-gray-900">Applications Management</h4>
                             <p class="text-xs text-gray-500">
-                                ดูรายการแอปทั้งหมด (13 apps) พร้อมข้อมูล: ชื่อ, รหัส, ประเภท (web/mobile/hybrid), จำนวน Modules<br>
+                                ดูรายการแอปทั้งหมด (15 apps) พร้อมข้อมูล: ชื่อ, รหัส, ประเภท (web/mobile/hybrid), จำนวน Modules<br>
                                 คลิกเข้าดูรายละเอียดแต่ละ App — เห็น Modules ทั้งหมดพร้อมสถานะ Active/Inactive
                             </p>
                         </div>
@@ -571,7 +573,7 @@
         <div id="apps" class="mb-12">
             <div class="flex items-center gap-3 mb-4">
                 <span class="flex items-center justify-center w-8 h-8 rounded-full bg-orange-100 text-orange-600 font-bold text-sm">6</span>
-                <h2 class="text-xl font-bold text-gray-900">13 Applications / แอปพลิเคชันทั้ง 13 ตัว</h2>
+                <h2 class="text-xl font-bold text-gray-900">15 Applications / แอปพลิเคชันทั้ง 15 ตัว</h2>
             </div>
 
             <div class="space-y-3">
@@ -680,6 +682,22 @@
                             'color' => 'pink',
                             'desc' => 'จัดการอีเวนต์และ MICE — Meetings, Incentives, Conferences, Exhibitions ครบวงจร',
                             'modules' => ['Event Management', 'Venue Booking', 'MICE Planner', 'Ticket & Registration', 'Exhibitor Portal', 'Attendee Engagement', 'Event Analytics'],
+                        ],
+                        [
+                            'name' => 'Project Management',
+                            'code' => 'PROJECT_MGMT',
+                            'type' => 'Web Application',
+                            'color' => 'violet',
+                            'desc' => 'ระบบบริหารโครงการ — วางแผน ติดตาม Gantt chart จัดสรรทรัพยากร งบประมาณ บริหารความเสี่ยง',
+                            'modules' => ['Project Dashboard', 'Task & Gantt', 'Resource Management', 'Budget & Cost Tracking', 'Document & Files', 'Risk Management', 'Reporting & Analytics'],
+                        ],
+                        [
+                            'name' => 'Data Exchange',
+                            'code' => 'DATA_EXCHANGE',
+                            'type' => 'Web Application',
+                            'color' => 'emerald',
+                            'desc' => 'ศูนย์แลกเปลี่ยนข้อมูลกลาง — Data Catalog, คุณภาพข้อมูล, ความปลอดภัย, High Value Dataset, Sandbox, ติดตามการใช้งาน',
+                            'modules' => ['Data Index', 'Data Catalog', 'Data Quality', 'Data Security', 'High Value Dataset', 'Data Sandbox', 'Data Request', 'Tracking & Monitoring'],
                         ],
                     ];
                 @endphp

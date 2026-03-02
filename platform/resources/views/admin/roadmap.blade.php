@@ -71,7 +71,7 @@
                             ['title' => 'Global Header Menu (Dynamic)', 'desc' => 'Header ที่กรองตามสิทธิ์อัตโนมัติ, Cluster Switcher, User Menu, Mobile responsive'],
                             ['title' => 'Admin Panel (Dashboard, Applications, Permissions)', 'desc' => 'Backend admin: Dashboard stats, Application CRUD, Permission hub (Users/Groups/Roles), API Reference'],
                             ['title' => 'API Integration Layer', 'desc' => 'RESTful API: Auth, Clusters, Menu, Admin APIs — พร้อม Sandbox testing, bilingual docs (TH/EN)'],
-                            ['title' => 'Pattaya Cluster Setup (13 Apps, 83 Modules)', 'desc' => 'ข้อมูล seeded: 13 applications (incl. City Dashboard, Gov ERP GFMIS, Event & MICE), 83 modules, 7 roles, 4 groups, demo users, API providers'],
+                            ['title' => 'Pattaya Cluster Setup (15 Apps, 98 Modules)', 'desc' => 'ข้อมูล seeded: 15 applications (incl. City Dashboard, Gov ERP GFMIS, Event & MICE, Project Management, Data Exchange), 98 modules, 7 roles, 4 groups, demo users, API providers'],
                             ['title' => 'UI Component Library', 'desc' => 'Blade components: Card, Table, Badge, Button, Modal, Dropdown, Alert, Stat Card, Empty State, Icon system'],
                         ];
                     @endphp
