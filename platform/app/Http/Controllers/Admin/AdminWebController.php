@@ -82,6 +82,11 @@ class AdminWebController extends Controller
         return view('admin.api-reference');
     }
 
+    public function roadmap()
+    {
+        return view('admin.roadmap');
+    }
+
     public function loginForm()
     {
         return view('admin.login');

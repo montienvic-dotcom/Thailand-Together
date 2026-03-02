@@ -20,10 +20,16 @@
             Admin Panel
         </span>
     </a>
-    <a href="{{ route('superapp.api-docs') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 border-b border-gray-100">
+    <a href="{{ route('superapp.api-docs') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
         <span class="flex items-center gap-2">
             <x-icon name="code-bracket" class="w-4 h-4 text-gray-400" />
             API Reference
+        </span>
+    </a>
+    <a href="{{ route('superapp.guide') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 border-b border-gray-100">
+        <span class="flex items-center gap-2">
+            <x-icon name="book-open" class="w-4 h-4 text-gray-400" />
+            User Guide
         </span>
     </a>
 

@@ -8,6 +8,7 @@ Route::get('/', [SuperAppWebController::class, 'landing'])->name('superapp.landi
 
 // Public pages (no auth)
 Route::get('/api-docs', [SuperAppWebController::class, 'apiDocs'])->name('superapp.api-docs');
+Route::get('/guide', [SuperAppWebController::class, 'guide'])->name('superapp.guide');
 
 // Auth routes
 Route::get('/login', [SuperAppWebController::class, 'loginForm'])->name('login');

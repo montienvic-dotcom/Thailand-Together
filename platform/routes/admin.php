@@ -44,4 +44,5 @@ Route::middleware(['web', 'auth', 'cluster.aware'])->prefix('admin')->name('admi
     Route::get('/permissions/groups', [AdminWebController::class, 'permissionGroups'])->name('permissions.groups');
     Route::get('/permissions/roles', [AdminWebController::class, 'permissionRoles'])->name('permissions.roles');
     Route::get('/api-reference', [AdminWebController::class, 'apiReference'])->name('api-reference');
+    Route::get('/roadmap', [AdminWebController::class, 'roadmap'])->name('roadmap');
 });
