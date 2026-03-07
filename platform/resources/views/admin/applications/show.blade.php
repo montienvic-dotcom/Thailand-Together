@@ -136,10 +136,11 @@
                                 <td class="px-4 py-3 text-right">
                                     <button
                                         @click="openEditModule({{ $module->id }}, {{ json_encode($module->name) }}, {{ json_encode($module->description ?? '') }}, {{ json_encode($module->icon ?? '') }}, {{ json_encode($module->route_prefix ?? '') }})"
-                                        class="text-gray-400 hover:text-gray-600 p-1"
+                                        class="inline-flex items-center gap-1 text-gray-400 hover:text-gray-600 p-1 text-sm"
                                         title="Edit module"
                                     >
                                         <x-icon name="pencil" class="w-4 h-4" />
+                                        <span>Edit</span>
                                     </button>
                                 </td>
                             </tr>
