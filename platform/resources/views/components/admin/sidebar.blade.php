@@ -7,7 +7,7 @@
     ];
 @endphp
 
-<div class="flex flex-col h-full bg-white border-r border-gray-200 overflow-hidden">
+<div class="flex flex-col h-full bg-white overflow-hidden">
     {{-- Logo --}}
     <div class="flex items-center gap-3 px-4 py-4 border-b border-gray-100 min-h-[57px]">
         <div class="w-8 h-8 rounded-lg bg-(--color-primary) flex items-center justify-center flex-shrink-0">

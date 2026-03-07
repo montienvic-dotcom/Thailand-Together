@@ -6,13 +6,6 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Admin') - Thailand Together</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <style>
-        :root { --sidebar-w: 16rem; }
-        @media (min-width: 1024px) {
-            .admin-sidebar { width: var(--sidebar-w); }
-            .admin-main { padding-left: var(--sidebar-w); }
-        }
-    </style>
 </head>
 <body class="h-full" x-data="{
     sidebarOpen: false,
@@ -21,7 +14,7 @@
         this.sidebarCollapsed = !this.sidebarCollapsed;
         localStorage.setItem('sidebarCollapsed', this.sidebarCollapsed);
     }
-}" x-effect="document.documentElement.style.setProperty('--sidebar-w', sidebarCollapsed ? '4rem' : '16rem')">
+}">
     {{-- Mobile sidebar overlay --}}
     <div x-show="sidebarOpen" x-cloak class="fixed inset-0 z-40 lg:hidden">
         <div x-show="sidebarOpen"
@@ -32,40 +25,46 @@
              x-transition:enter="transition ease-in-out duration-300" x-transition:enter-start="-translate-x-full" x-transition:enter-end="translate-x-0"
              x-transition:leave="transition ease-in-out duration-300" x-transition:leave-start="translate-x-0" x-transition:leave-end="-translate-x-full"
              class="relative flex w-64 flex-col bg-white h-full">
-            <button @click="sidebarOpen = false" class="absolute top-2 right-2 p-2 text-gray-400 hover:text-gray-600">
+            <button @click="sidebarOpen = false" class="absolute top-2 right-2 p-2 text-gray-400 hover:text-gray-600 z-10">
                 <x-icon name="x-mark" class="w-5 h-5" />
             </button>
             <x-admin.sidebar />
         </div>
     </div>
 
-    {{-- Desktop sidebar --}}
-    <div class="admin-sidebar hidden lg:flex lg:flex-col lg:fixed lg:inset-y-0 lg:z-30 transition-all duration-300 ease-in-out">
-        <x-admin.sidebar />
-    </div>
+    {{-- Desktop layout: flex row with sidebar + main --}}
+    <div class="min-h-screen lg:flex">
+        {{-- Desktop sidebar: in-flow, sticky --}}
+        <aside class="hidden lg:block flex-shrink-0 transition-all duration-300 ease-in-out"
+               :style="'width: ' + (sidebarCollapsed ? '4rem' : '16rem')">
+            <div class="sticky top-0 h-screen overflow-y-auto overflow-x-hidden border-r border-gray-200 bg-white">
+                <x-admin.sidebar />
+            </div>
+        </aside>
 
-    {{-- Main content --}}
-    <div class="admin-main flex flex-col min-h-screen transition-all duration-300 ease-in-out">
-        <x-admin.topbar />
+        {{-- Main content: fills remaining space --}}
+        <div class="flex-1 min-w-0 flex flex-col min-h-screen">
+            <x-admin.topbar />
 
-        <main class="flex-1 p-3 sm:p-4 lg:p-6 overflow-x-hidden">
-            @if(isset($breadcrumb))
-                <div class="mb-3 sm:mb-4">{{ $breadcrumb }}</div>
-            @endif
+            <main class="flex-1 p-3 sm:p-4 lg:p-6 overflow-x-hidden">
+                @if(isset($breadcrumb))
+                    <div class="mb-3 sm:mb-4">{{ $breadcrumb }}</div>
+                @endif
 
-            @if(session('success'))
-                <div class="mb-3 sm:mb-4">
-                    <x-ui.alert type="success" :dismissible="true">{{ session('success') }}</x-ui.alert>
-                </div>
-            @endif
-            @if(session('error'))
-                <div class="mb-3 sm:mb-4">
-                    <x-ui.alert type="error" :dismissible="true">{{ session('error') }}</x-ui.alert>
-                </div>
-            @endif
+                @if(session('success'))
+                    <div class="mb-3 sm:mb-4">
+                        <x-ui.alert type="success" :dismissible="true">{{ session('success') }}</x-ui.alert>
+                    </div>
+                @endif
+                @if(session('error'))
+                    <div class="mb-3 sm:mb-4">
+                        <x-ui.alert type="error" :dismissible="true">{{ session('error') }}</x-ui.alert>
+                    </div>
+                @endif
 
-            @yield('content')
-        </main>
+                @yield('content')
+            </main>
+        </div>
     </div>
 </body>
 </html>
