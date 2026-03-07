@@ -1,13 +1,28 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full bg-gray-50">
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Admin') - Thailand Together</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <style>
+        /* Admin layout — plain CSS, not dependent on Tailwind */
+        html, body { height: 100%; margin: 0; overflow: hidden; background: #f9fafb; }
+        .admin-shell { display: flex; height: 100%; overflow: hidden; }
+        .admin-sidebar { flex-shrink: 0; height: 100%; overflow-y: auto; overflow-x: hidden;
+            background: #fff; border-right: 1px solid #e5e7eb; transition: width 0.3s ease; }
+        .admin-main { flex: 1 1 0%; min-width: 0; display: flex; flex-direction: column; height: 100%; overflow-y: auto; }
+        .admin-topbar { position: sticky; top: 0; z-index: 20; background: #fff; border-bottom: 1px solid #e5e7eb; }
+        .admin-body { flex: 1 1 0%; padding: 0.75rem; }
+        @media (min-width: 640px) { .admin-body { padding: 1rem; } }
+        @media (min-width: 1024px) { .admin-body { padding: 1.5rem; } }
+        @media (max-width: 1023px) {
+            .admin-sidebar { display: none; }
+        }
+    </style>
 </head>
-<body class="h-full overflow-hidden" x-data="{
+<body x-data="{
     sidebarOpen: false,
     sidebarCollapsed: localStorage.getItem('sidebarCollapsed') === 'true',
     toggleCollapse() {
@@ -32,21 +47,20 @@
         </div>
     </div>
 
-    {{-- Full-screen layout container --}}
-    <div class="h-full flex flex-col lg:flex-row overflow-hidden">
+    {{-- Main layout --}}
+    <div class="admin-shell">
         {{-- Desktop sidebar --}}
-        <aside class="hidden lg:flex flex-shrink-0 transition-all duration-300 ease-in-out border-r border-gray-200 bg-white"
-               :style="'width: ' + (sidebarCollapsed ? '4rem' : '16rem')">
-            <div class="flex flex-col h-full w-full overflow-y-auto overflow-x-hidden">
-                <x-admin.sidebar />
+        <div class="admin-sidebar" :style="'width: ' + (sidebarCollapsed ? '4rem' : '16rem')">
+            <x-admin.sidebar />
+        </div>
+
+        {{-- Main content area (scrolls independently) --}}
+        <div class="admin-main">
+            <div class="admin-topbar">
+                <x-admin.topbar />
             </div>
-        </aside>
 
-        {{-- Main content area: this is the scroll container --}}
-        <div class="flex-1 min-w-0 flex flex-col h-full overflow-y-auto" id="main-scroll">
-            <x-admin.topbar />
-
-            <main class="flex-1 p-3 sm:p-4 lg:p-6">
+            <div class="admin-body">
                 @if(isset($breadcrumb))
                     <div class="mb-3 sm:mb-4">{{ $breadcrumb }}</div>
                 @endif
@@ -63,7 +77,7 @@
                 @endif
 
                 @yield('content')
-            </main>
+            </div>
         </div>
     </div>
 </body>
