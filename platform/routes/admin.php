@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminApplicationController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminWebController;
 use App\Http\Controllers\Admin\PermissionController;
@@ -39,6 +40,15 @@ Route::middleware(['web', 'auth', 'cluster.aware'])->prefix('admin')->name('admi
     Route::get('/', [AdminWebController::class, 'dashboard'])->name('dashboard');
     Route::get('/applications', [AdminWebController::class, 'applications'])->name('applications');
     Route::get('/applications/{application}', [AdminWebController::class, 'applicationDetail'])->name('applications.show');
+
+    // Application management API (AJAX from admin views)
+    Route::put('/applications/{application}', [AdminApplicationController::class, 'update'])->name('applications.update');
+    Route::patch('/applications/{application}/toggle', [AdminApplicationController::class, 'toggleActive'])->name('applications.toggle');
+    Route::post('/applications/{application}/reorder-modules', [AdminApplicationController::class, 'reorderModules'])->name('applications.reorder-modules');
+    Route::patch('/modules/{module}/toggle', [AdminApplicationController::class, 'toggleModule'])->name('modules.toggle');
+    Route::patch('/modules/{module}/toggle-premium', [AdminApplicationController::class, 'toggleModulePremium'])->name('modules.toggle-premium');
+    Route::put('/modules/{module}', [AdminApplicationController::class, 'updateModule'])->name('modules.update');
+
     Route::get('/permissions', [AdminWebController::class, 'permissions'])->name('permissions');
     Route::get('/permissions/users', [AdminWebController::class, 'permissionUsers'])->name('permissions.users');
     Route::get('/permissions/groups', [AdminWebController::class, 'permissionGroups'])->name('permissions.groups');

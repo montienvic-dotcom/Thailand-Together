@@ -48,8 +48,10 @@ class AdminWebController extends Controller
 
     public function applicationDetail(int $application)
     {
-        $app = Application::with(['activeModules' => fn($q) => $q->orderBy('sort_order')])
-            ->findOrFail($application);
+        $app = Application::with([
+            'modules' => fn($q) => $q->orderBy('sort_order'),
+            'clusters' => fn($q) => $q->orderBy('sort_order'),
+        ])->findOrFail($application);
 
         return view('admin.applications.show', compact('app'));
     }
