@@ -7,7 +7,7 @@
     <title>@yield('title', 'Admin') - Thailand Together</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="h-full" x-data="{
+<body class="h-full overflow-hidden" x-data="{
     sidebarOpen: false,
     sidebarCollapsed: localStorage.getItem('sidebarCollapsed') === 'true',
     toggleCollapse() {
@@ -32,21 +32,21 @@
         </div>
     </div>
 
-    {{-- Desktop layout: flex row with sidebar + main --}}
-    <div class="min-h-screen lg:flex">
-        {{-- Desktop sidebar: in-flow, sticky --}}
-        <aside class="hidden lg:block flex-shrink-0 transition-all duration-300 ease-in-out"
+    {{-- Full-screen layout container --}}
+    <div class="h-full flex flex-col lg:flex-row overflow-hidden">
+        {{-- Desktop sidebar --}}
+        <aside class="hidden lg:flex flex-shrink-0 transition-all duration-300 ease-in-out border-r border-gray-200 bg-white"
                :style="'width: ' + (sidebarCollapsed ? '4rem' : '16rem')">
-            <div class="sticky top-0 h-screen overflow-y-auto overflow-x-hidden border-r border-gray-200 bg-white">
+            <div class="flex flex-col h-full w-full overflow-y-auto overflow-x-hidden">
                 <x-admin.sidebar />
             </div>
         </aside>
 
-        {{-- Main content: fills remaining space --}}
-        <div class="flex-1 min-w-0 flex flex-col min-h-screen">
+        {{-- Main content area: this is the scroll container --}}
+        <div class="flex-1 min-w-0 flex flex-col h-full overflow-y-auto" id="main-scroll">
             <x-admin.topbar />
 
-            <main class="flex-1 p-3 sm:p-4 lg:p-6 overflow-x-hidden">
+            <main class="flex-1 p-3 sm:p-4 lg:p-6">
                 @if(isset($breadcrumb))
                     <div class="mb-3 sm:mb-4">{{ $breadcrumb }}</div>
                 @endif
