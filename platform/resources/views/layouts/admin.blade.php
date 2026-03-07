@@ -6,6 +6,13 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Admin') - Thailand Together</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <style>
+        :root { --sidebar-w: 16rem; }
+        @media (min-width: 1024px) {
+            .admin-sidebar { width: var(--sidebar-w); }
+            .admin-main { padding-left: var(--sidebar-w); }
+        }
+    </style>
 </head>
 <body class="h-full" x-data="{
     sidebarOpen: false,
@@ -14,7 +21,7 @@
         this.sidebarCollapsed = !this.sidebarCollapsed;
         localStorage.setItem('sidebarCollapsed', this.sidebarCollapsed);
     }
-}">
+}" x-effect="document.documentElement.style.setProperty('--sidebar-w', sidebarCollapsed ? '4rem' : '16rem')">
     {{-- Mobile sidebar overlay --}}
     <div x-show="sidebarOpen" x-cloak class="fixed inset-0 z-40 lg:hidden">
         <div x-show="sidebarOpen"
@@ -33,14 +40,12 @@
     </div>
 
     {{-- Desktop sidebar --}}
-    <div class="hidden lg:flex lg:flex-col lg:fixed lg:inset-y-0 lg:z-30 transition-all duration-300 ease-in-out"
-         :class="sidebarCollapsed ? 'lg:w-16' : 'lg:w-64'">
+    <div class="admin-sidebar hidden lg:flex lg:flex-col lg:fixed lg:inset-y-0 lg:z-30 transition-all duration-300 ease-in-out">
         <x-admin.sidebar />
     </div>
 
     {{-- Main content --}}
-    <div class="flex flex-col min-h-screen transition-all duration-300 ease-in-out"
-         :class="sidebarCollapsed ? 'lg:pl-16' : 'lg:pl-64'">
+    <div class="admin-main flex flex-col min-h-screen transition-all duration-300 ease-in-out">
         <x-admin.topbar />
 
         <main class="flex-1 p-3 sm:p-4 lg:p-6 overflow-x-hidden">
