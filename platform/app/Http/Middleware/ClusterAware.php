@@ -23,6 +23,13 @@ class ClusterAware
         $cluster = $this->resolveCluster($request);
 
         if (!$cluster) {
+            // Admin routes: fallback to first active cluster (admin manages all clusters)
+            if ($request->is('admin/*') || $request->is('admin')) {
+                $cluster = Cluster::active()->first();
+            }
+        }
+
+        if (!$cluster) {
             if ($request->expectsJson()) {
                 return response()->json([
                     'error' => 'Cluster not found or inactive',
