@@ -11,54 +11,54 @@
 
     <div x-data="appManager()" x-cloak>
         {{-- App header with actions --}}
-        <div class="mt-4 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div class="flex items-start justify-between">
-                <div class="flex items-start gap-4">
-                    <div class="w-14 h-14 rounded-xl flex items-center justify-center" style="background-color: {{ $app->color ?? '#6C757D' }}20">
-                        <x-icon :name="$app->icon ?? 'cube'" class="w-8 h-8" style="color: {{ $app->color ?? '#6C757D' }}" />
+        <div class="mt-3 sm:mt-4 bg-white rounded-xl shadow-sm border border-gray-200 p-3 sm:p-4 lg:p-6">
+            <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
+                <div class="flex items-start gap-3 sm:gap-4 min-w-0">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 rounded-xl flex items-center justify-center flex-shrink-0" style="background-color: {{ $app->color ?? '#6C757D' }}20">
+                        <x-icon :name="$app->icon ?? 'cube'" class="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8" style="color: {{ $app->color ?? '#6C757D' }}" />
                     </div>
-                    <div class="flex-1">
-                        <h2 class="text-xl font-bold text-gray-900">{{ $app->name }}</h2>
+                    <div class="min-w-0 flex-1">
+                        <h2 class="text-base sm:text-lg lg:text-xl font-bold text-gray-900 truncate">{{ $app->name }}</h2>
                         @if($app->description)
-                            <p class="mt-1 text-sm text-gray-500">{{ $app->description }}</p>
+                            <p class="mt-0.5 sm:mt-1 text-xs sm:text-sm text-gray-500 line-clamp-2">{{ $app->description }}</p>
                         @endif
-                        <div class="mt-3 flex items-center gap-2 flex-wrap">
+                        <div class="mt-2 sm:mt-3 flex items-center gap-1.5 sm:gap-2 flex-wrap">
                             <x-ui.badge :color="$app->type === 'mobile' ? 'purple' : ($app->type === 'hybrid' ? 'teal' : 'blue')">
                                 {{ ucfirst($app->type) }}
                             </x-ui.badge>
                             <x-ui.badge :color="$app->source === 'internal' ? 'green' : 'orange'">
                                 {{ ucfirst($app->source) }}
                             </x-ui.badge>
-                            <span class="text-xs text-gray-400 font-mono">{{ $app->code }}</span>
+                            <span class="text-[10px] sm:text-xs text-gray-400 font-mono">{{ $app->code }}</span>
                             @if($app->base_url)
-                                <span class="text-xs text-blue-500">{{ $app->base_url }}</span>
+                                <span class="text-[10px] sm:text-xs text-blue-500 truncate max-w-[150px] sm:max-w-none">{{ $app->base_url }}</span>
                             @endif
                         </div>
                     </div>
                 </div>
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2 sm:gap-3 flex-shrink-0 self-end sm:self-auto">
                     {{-- Toggle app active --}}
-                    <div class="flex items-center gap-2">
-                        <span class="text-xs text-gray-500" x-text="appActive ? 'Active' : 'Inactive'"></span>
+                    <div class="flex items-center gap-1.5 sm:gap-2">
+                        <span class="text-[10px] sm:text-xs text-gray-500" x-text="appActive ? 'Active' : 'Inactive'"></span>
                         <button
                             @click="toggleApp()"
                             :disabled="loading"
-                            class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
+                            class="relative inline-flex h-5 w-9 sm:h-6 sm:w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
                             :class="appActive ? 'bg-green-500' : 'bg-gray-300'"
                             role="switch"
                             :aria-checked="appActive"
                         >
                             <span
-                                class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
-                                :class="appActive ? 'translate-x-5' : 'translate-x-0'"
+                                class="pointer-events-none inline-block h-4 w-4 sm:h-5 sm:w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                                :class="appActive ? 'translate-x-4 sm:translate-x-5' : 'translate-x-0'"
                             ></span>
                         </button>
                     </div>
 
                     {{-- Edit app button --}}
                     <x-ui.button variant="outline" size="sm" @click="$dispatch('open-modal-edit-app')">
-                        <x-icon name="pencil" class="w-4 h-4 mr-1" />
-                        Edit
+                        <x-icon name="pencil" class="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1" />
+                        <span class="text-xs sm:text-sm">Edit</span>
                     </x-ui.button>
                 </div>
             </div>
@@ -66,11 +66,11 @@
 
         {{-- Cluster assignments --}}
         @if($app->clusters->isNotEmpty())
-            <x-ui.card title="Cluster Assignments" class="mt-6">
-                <div class="flex flex-wrap gap-3">
+            <x-ui.card title="Cluster Assignments" class="mt-4 sm:mt-6">
+                <div class="flex flex-wrap gap-2 sm:gap-3">
                     @foreach($app->clusters as $cluster)
-                        <div class="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg border">
-                            <span class="text-sm font-medium text-gray-700">{{ $cluster->name }}</span>
+                        <div class="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 bg-gray-50 rounded-lg border">
+                            <span class="text-xs sm:text-sm font-medium text-gray-700">{{ $cluster->name }}</span>
                             <x-ui.badge :color="$cluster->pivot->is_active ? 'green' : 'red'" size="sm">
                                 {{ $cluster->pivot->is_active ? 'Active' : 'Inactive' }}
                             </x-ui.badge>
@@ -81,9 +81,9 @@
         @endif
 
         {{-- Modules management --}}
-        <div class="mt-6">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-gray-900">Modules ({{ $app->modules->count() }})</h3>
+        <div class="mt-4 sm:mt-6">
+            <div class="flex items-center justify-between mb-3 sm:mb-4">
+                <h3 class="text-sm sm:text-base lg:text-lg font-semibold text-gray-900">Modules ({{ $app->modules->count() }})</h3>
             </div>
 
             @forelse($app->modules as $module)
@@ -91,56 +91,57 @@
                     <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                         <x-ui.table>
                             <x-slot:head>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase w-8">#</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Module</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Code</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
-                                <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Premium</th>
-                                <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Active</th>
-                                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
+                                <th class="px-2 sm:px-3 lg:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase w-6 sm:w-8">#</th>
+                                <th class="px-2 sm:px-3 lg:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase">Module</th>
+                                <th class="px-2 sm:px-3 lg:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase hidden sm:table-cell">Code</th>
+                                <th class="px-2 sm:px-3 lg:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase hidden lg:table-cell">Description</th>
+                                <th class="px-2 sm:px-3 lg:px-4 py-2 sm:py-3 text-center text-[10px] sm:text-xs font-medium text-gray-500 uppercase">Premium</th>
+                                <th class="px-2 sm:px-3 lg:px-4 py-2 sm:py-3 text-center text-[10px] sm:text-xs font-medium text-gray-500 uppercase">Active</th>
+                                <th class="px-2 sm:px-3 lg:px-4 py-2 sm:py-3 text-right text-[10px] sm:text-xs font-medium text-gray-500 uppercase"></th>
                             </x-slot:head>
                 @endif
 
                             <tr class="hover:bg-gray-50 transition-colors" :class="{ 'opacity-50': !modules[{{ $module->id }}]?.is_active }">
-                                <td class="px-4 py-3 text-sm text-gray-400">{{ $loop->iteration }}</td>
-                                <td class="px-4 py-3">
-                                    <span class="text-sm font-medium text-gray-900">{{ $module->name }}</span>
+                                <td class="px-2 sm:px-3 lg:px-4 py-2 sm:py-3 text-xs sm:text-sm text-gray-400">{{ $loop->iteration }}</td>
+                                <td class="px-2 sm:px-3 lg:px-4 py-2 sm:py-3">
+                                    <span class="text-xs sm:text-sm font-medium text-gray-900">{{ $module->name }}</span>
+                                    <span class="block sm:hidden text-[10px] text-gray-400 font-mono mt-0.5">{{ $module->code }}</span>
                                 </td>
-                                <td class="px-4 py-3 text-sm text-gray-500 font-mono">{{ $module->code }}</td>
-                                <td class="px-4 py-3 text-sm text-gray-500 max-w-xs truncate">{{ $module->description ?? '-' }}</td>
-                                <td class="px-4 py-3 text-center">
+                                <td class="px-2 sm:px-3 lg:px-4 py-2 sm:py-3 text-xs sm:text-sm text-gray-500 font-mono hidden sm:table-cell">{{ $module->code }}</td>
+                                <td class="px-2 sm:px-3 lg:px-4 py-2 sm:py-3 text-xs sm:text-sm text-gray-500 max-w-xs truncate hidden lg:table-cell">{{ $module->description ?? '-' }}</td>
+                                <td class="px-2 sm:px-3 lg:px-4 py-2 sm:py-3 text-center">
                                     <button
                                         @click="togglePremium({{ $module->id }})"
                                         :disabled="loading"
-                                        class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium transition-colors cursor-pointer"
+                                        class="inline-flex items-center gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium transition-colors cursor-pointer"
                                         :class="modules[{{ $module->id }}]?.is_premium ? 'bg-orange-100 text-orange-700 hover:bg-orange-200' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'"
                                     >
-                                        <x-icon name="star" class="w-3 h-3" />
+                                        <x-icon name="star" class="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                                         <span x-text="modules[{{ $module->id }}]?.is_premium ? 'Premium' : 'Free'"></span>
                                     </button>
                                 </td>
-                                <td class="px-4 py-3 text-center">
+                                <td class="px-2 sm:px-3 lg:px-4 py-2 sm:py-3 text-center">
                                     <button
                                         @click="toggleModule({{ $module->id }})"
                                         :disabled="loading"
-                                        class="relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
+                                        class="relative inline-flex h-4 w-7 sm:h-5 sm:w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
                                         :class="modules[{{ $module->id }}]?.is_active ? 'bg-green-500' : 'bg-gray-300'"
                                         role="switch"
                                     >
                                         <span
-                                            class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
-                                            :class="modules[{{ $module->id }}]?.is_active ? 'translate-x-4' : 'translate-x-0'"
+                                            class="pointer-events-none inline-block h-3 w-3 sm:h-4 sm:w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                                            :class="modules[{{ $module->id }}]?.is_active ? 'translate-x-3 sm:translate-x-4' : 'translate-x-0'"
                                         ></span>
                                     </button>
                                 </td>
-                                <td class="px-4 py-3 text-right">
+                                <td class="px-2 sm:px-3 lg:px-4 py-2 sm:py-3 text-right">
                                     <button
                                         @click="openEditModule({{ $module->id }}, {{ json_encode($module->name) }}, {{ json_encode($module->description ?? '') }}, {{ json_encode($module->icon ?? '') }}, {{ json_encode($module->route_prefix ?? '') }})"
-                                        class="inline-flex items-center gap-1 text-gray-400 hover:text-gray-600 p-1 text-sm"
+                                        class="inline-flex items-center gap-1 text-gray-400 hover:text-gray-600 p-0.5 sm:p-1 text-xs sm:text-sm"
                                         title="Edit module"
                                     >
-                                        <x-icon name="pencil" class="w-4 h-4" />
-                                        <span>Edit</span>
+                                        <x-icon name="pencil" class="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                        <span class="hidden sm:inline">Edit</span>
                                     </button>
                                 </td>
                             </tr>
