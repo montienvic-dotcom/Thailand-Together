@@ -32,7 +32,7 @@
         </div>
 
         {{-- Main content --}}
-        <div class="lg:pl-64 flex flex-col flex-1 min-h-screen">
+        <div class="lg:pl-64 flex flex-col flex-1 min-w-0 min-h-screen">
             <x-admin.topbar />
 
             <main class="flex-1 p-6">
