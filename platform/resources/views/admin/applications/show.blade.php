@@ -86,21 +86,20 @@
                 <h3 class="text-sm sm:text-base lg:text-lg font-semibold text-gray-900">Modules ({{ $app->modules->count() }})</h3>
             </div>
 
-            @forelse($app->modules as $module)
-                @if($loop->first)
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                        <x-ui.table>
-                            <x-slot:head>
-                                <th class="px-2 sm:px-3 lg:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase w-6 sm:w-8">#</th>
-                                <th class="px-2 sm:px-3 lg:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase">Module</th>
-                                <th class="px-2 sm:px-3 lg:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase hidden sm:table-cell">Code</th>
-                                <th class="px-2 sm:px-3 lg:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase hidden lg:table-cell">Description</th>
-                                <th class="px-2 sm:px-3 lg:px-4 py-2 sm:py-3 text-center text-[10px] sm:text-xs font-medium text-gray-500 uppercase">Premium</th>
-                                <th class="px-2 sm:px-3 lg:px-4 py-2 sm:py-3 text-center text-[10px] sm:text-xs font-medium text-gray-500 uppercase">Active</th>
-                                <th class="px-2 sm:px-3 lg:px-4 py-2 sm:py-3 text-right text-[10px] sm:text-xs font-medium text-gray-500 uppercase"></th>
-                            </x-slot:head>
-                @endif
+            @if($app->modules->isNotEmpty())
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <x-ui.table>
+                        <x-slot:head>
+                            <th class="px-2 sm:px-3 lg:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase w-6 sm:w-8">#</th>
+                            <th class="px-2 sm:px-3 lg:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase">Module</th>
+                            <th class="px-2 sm:px-3 lg:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase hidden sm:table-cell">Code</th>
+                            <th class="px-2 sm:px-3 lg:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase hidden lg:table-cell">Description</th>
+                            <th class="px-2 sm:px-3 lg:px-4 py-2 sm:py-3 text-center text-[10px] sm:text-xs font-medium text-gray-500 uppercase">Premium</th>
+                            <th class="px-2 sm:px-3 lg:px-4 py-2 sm:py-3 text-center text-[10px] sm:text-xs font-medium text-gray-500 uppercase">Active</th>
+                            <th class="px-2 sm:px-3 lg:px-4 py-2 sm:py-3 text-right text-[10px] sm:text-xs font-medium text-gray-500 uppercase"></th>
+                        </x-slot:head>
 
+                        @foreach($app->modules as $module)
                             <tr class="hover:bg-gray-50 transition-colors" :class="{ 'opacity-50': !modules[{{ $module->id }}]?.is_active }">
                                 <td class="px-2 sm:px-3 lg:px-4 py-2 sm:py-3 text-xs sm:text-sm text-gray-400">{{ $loop->iteration }}</td>
                                 <td class="px-2 sm:px-3 lg:px-4 py-2 sm:py-3">
@@ -145,16 +144,14 @@
                                     </button>
                                 </td>
                             </tr>
-
-                @if($loop->last)
-                        </x-ui.table>
-                    </div>
-                @endif
-            @empty
+                        @endforeach
+                    </x-ui.table>
+                </div>
+            @else
                 <x-ui.card>
                     <x-ui.empty-state title="No modules" description="This application has no modules yet." icon="cube" />
                 </x-ui.card>
-            @endforelse
+            @endif
         </div>
 
         {{-- Edit App Modal --}}
