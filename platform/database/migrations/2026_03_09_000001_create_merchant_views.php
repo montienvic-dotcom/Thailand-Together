@@ -104,7 +104,7 @@ return new class extends Migration
             CREATE OR REPLACE VIEW vw_merchant_search_user AS
             SELECT
                 pub.*,
-                u.user_id,
+                u.id AS user_id,
                 COALESCE(mc_agg.visit_count, 0) AS visit_count,
                 IF(COALESCE(mc_agg.visit_count, 0) > 0, 1, 0) AS visited,
                 mc_agg.last_checkin_at,
@@ -121,11 +121,11 @@ return new class extends Migration
                        MAX(created_at) AS last_checkin_at
                 FROM merchant_checkin
                 GROUP BY user_id, merchant_id
-            ) mc_agg ON mc_agg.user_id = u.user_id AND mc_agg.merchant_id = pub.merchant_id
+            ) mc_agg ON mc_agg.user_id = u.id AND mc_agg.merchant_id = pub.merchant_id
             LEFT JOIN merchant_favorite mf
-                ON mf.user_id = u.user_id AND mf.merchant_id = pub.merchant_id
+                ON mf.user_id = u.id AND mf.merchant_id = pub.merchant_id
             LEFT JOIN merchant_wishlist mw
-                ON mw.user_id = u.user_id AND mw.merchant_id = pub.merchant_id
+                ON mw.user_id = u.id AND mw.merchant_id = pub.merchant_id
             LEFT JOIN (
                 SELECT user_id, merchant_id,
                        COUNT(*) AS review_count_by_user,
@@ -133,14 +133,14 @@ return new class extends Migration
                        MAX(rating) AS last_rating_by_user
                 FROM merchant_review
                 GROUP BY user_id, merchant_id
-            ) mr_agg ON mr_agg.user_id = u.user_id AND mr_agg.merchant_id = pub.merchant_id
+            ) mr_agg ON mr_agg.user_id = u.id AND mr_agg.merchant_id = pub.merchant_id
         ");
 
         // ── 5) vw_merchant_search_blob_user ──
         DB::statement("
             CREATE OR REPLACE VIEW vw_merchant_search_blob_user AS
             SELECT
-                u.user_id,
+                u.id AS user_id,
                 b.merchant_id,
                 b.journey_id,
                 b.search_text
@@ -195,7 +195,7 @@ return new class extends Migration
             SELECT
                 j.journey_id,
                 j.journey_code,
-                u.user_id,
+                u.id AS user_id,
                 JSON_ARRAYAGG(
                     JSON_OBJECT(
                         'step_no', js.step_no,
@@ -230,11 +230,11 @@ return new class extends Migration
                        MAX(created_at) AS last_checkin_at
                 FROM merchant_checkin
                 GROUP BY user_id, merchant_id
-            ) mc_agg ON mc_agg.user_id = u.user_id AND mc_agg.merchant_id = m.merchant_id
+            ) mc_agg ON mc_agg.user_id = u.id AND mc_agg.merchant_id = m.merchant_id
             LEFT JOIN merchant_favorite mf
-                ON mf.user_id = u.user_id AND mf.merchant_id = m.merchant_id
+                ON mf.user_id = u.id AND mf.merchant_id = m.merchant_id
             LEFT JOIN merchant_wishlist mw
-                ON mw.user_id = u.user_id AND mw.merchant_id = m.merchant_id
+                ON mw.user_id = u.id AND mw.merchant_id = m.merchant_id
             LEFT JOIN (
                 SELECT user_id, merchant_id,
                        COUNT(*) AS review_count_by_user,
@@ -242,9 +242,9 @@ return new class extends Migration
                        MAX(rating) AS last_rating_by_user
                 FROM merchant_review
                 GROUP BY user_id, merchant_id
-            ) mr_agg ON mr_agg.user_id = u.user_id AND mr_agg.merchant_id = m.merchant_id
+            ) mr_agg ON mr_agg.user_id = u.id AND mr_agg.merchant_id = m.merchant_id
             WHERE j.status = 'ACTIVE'
-            GROUP BY j.journey_id, j.journey_code, u.user_id
+            GROUP BY j.journey_id, j.journey_code, u.id
         ");
 
         // ── 8) vw_api_journey_onecall_with_merchants_stats_final ──
