@@ -19,31 +19,18 @@ class MerchantController extends Controller
 
     /**
      * GET /api/merchants/search
-     *
-     * Public merchant search with filters:
-     *   ?q=seafood&journey_code=A2&tier_code=E&min_rating=4&limit=50&page=1
+     * Uses view: vw_merchant_search_public + vw_merchant_search_blob_public
      */
     public function search(MerchantSearchRequest $request): JsonResponse
     {
-        $filters = $request->validated();
-        $result = $this->merchantService->searchPublic($filters);
+        $result = $this->merchantService->searchPublic($request->validated());
 
-        return response()->json([
-            'data' => $result->items(),
-            'meta' => [
-                'current_page' => $result->currentPage(),
-                'per_page' => $result->perPage(),
-                'total' => $result->total(),
-                'last_page' => $result->lastPage(),
-            ],
-        ]);
+        return response()->json($result);
     }
 
     /**
      * GET /api/merchants/search/user
-     *
-     * User-context search:
-     *   ?user_id=1&visited=1&is_favorite=1&journey_code=A1
+     * Uses view: vw_merchant_search_user
      */
     public function searchUser(MerchantSearchRequest $request): JsonResponse
     {
@@ -52,21 +39,12 @@ class MerchantController extends Controller
 
         $result = $this->merchantService->searchUser($userId, $filters);
 
-        return response()->json([
-            'data' => $result->items(),
-            'meta' => [
-                'current_page' => $result->currentPage(),
-                'per_page' => $result->perPage(),
-                'total' => $result->total(),
-                'last_page' => $result->lastPage(),
-            ],
-        ]);
+        return response()->json($result);
     }
 
     /**
      * GET /api/places/{place_code}/merchants
-     *
-     * All merchants at a specific place.
+     * Uses view: vw_merchant_search_public
      */
     public function byPlace(string $placeCode): JsonResponse
     {
@@ -80,8 +58,6 @@ class MerchantController extends Controller
 
     /**
      * GET /api/merchant/{merchant_id}/reviews
-     *
-     * Published reviews for a merchant.
      */
     public function reviews(int $merchantId): JsonResponse
     {

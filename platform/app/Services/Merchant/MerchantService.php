@@ -3,292 +3,243 @@
 namespace App\Services\Merchant;
 
 use App\Models\Journey\Journey;
-use App\Models\Merchant\Merchant;
 use App\Models\Merchant\MerchantCheckin;
 use App\Models\Merchant\MerchantFavorite;
 use App\Models\Merchant\MerchantReview;
 use App\Models\Merchant\MerchantWishlist;
-use App\Models\Merchant\Place;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class MerchantService
 {
+    // ────────────────────────────────────────────────────────
+    // Journey One-Call (View-based — realtime)
+    // ────────────────────────────────────────────────────────
+
     /**
-     * Journey one-call: public (no user context).
+     * GET /api/journeys/{code}/onecall/final
+     * Uses: vw_api_journey_onecall_with_merchants_stats_final
      */
-    public function journeyOneCallPublic(string $journeyCode): ?array
+    public function journeyOneCallPublic(string $journeyCode): ?object
     {
-        $journey = Journey::active()
-            ->byCode($journeyCode)
-            ->with([
-                'i18n',
-                'tags',
-                'personas',
-                'markets',
-                'zones',
-                'next5',
-                'steps.place.merchants' => fn ($q) => $q->where('merchant.is_active', true),
-            ])
+        $row = DB::table('vw_api_journey_onecall_with_merchants_stats_final')
+            ->where('journey_code', $journeyCode)
             ->first();
 
-        if (! $journey) {
+        if (! $row) {
             return null;
         }
 
-        $merchants = $this->buildMerchantsJsonFromSteps($journey->steps);
-        $stats = $this->computeMerchantStats($merchants);
+        // Decode merchants_json if it's a string
+        if (is_string($row->merchants_json)) {
+            $row->merchants_json = json_decode($row->merchants_json, true);
+        }
+
+        // Attach i18n, tags, personas, markets, zones, next5 from relational tables
+        $journey = Journey::where('journey_code', $journeyCode)
+            ->with(['i18n', 'tags', 'personas', 'markets', 'zones', 'next5'])
+            ->first();
+
+        if ($journey) {
+            $row->journey_i18n_json = $this->formatI18n($journey->i18n);
+            $row->tags_json = $journey->tags->map(fn ($t) => ['tag_code' => $t->tag_code])->values();
+            $row->personas_json = $journey->personas->map(fn ($p) => ['persona_code' => $p->persona_code])->values();
+            $row->markets_json = $journey->markets->map(fn ($m) => ['country_code' => $m->country_code, 'fit_level' => $m->fit_level])->values();
+            $row->zones_json = $journey->zones->map(fn ($z) => ['zone_code' => $z->zone_code, 'fit_level' => $z->fit_level])->values();
+            $row->luxury_tone_json = ['th' => ['tone' => $row->luxury_tone_th], 'en' => ['tone' => $row->luxury_tone_en]];
+            $row->next5_json = $journey->next5->map(fn ($n) => ['next_rank' => $n->next_rank, 'next_journey_code' => $n->next_journey_code])->values();
+        }
+
+        return $row;
+    }
+
+    /**
+     * GET /api/journeys/{code}/onecall/final?user_id=123
+     * Uses: vw_api_journey_onecall_with_merchants_user
+     */
+    public function journeyOneCallUser(string $journeyCode, int $userId): ?object
+    {
+        $row = DB::table('vw_api_journey_onecall_with_merchants_user')
+            ->where('journey_code', $journeyCode)
+            ->where('user_id', $userId)
+            ->first();
+
+        if (! $row) {
+            // Fallback: user has no interaction yet, return public data with empty user states
+            $public = $this->journeyOneCallPublic($journeyCode);
+            if (! $public) {
+                return null;
+            }
+            $public->user_id = $userId;
+            $public->merchants_json_user = $public->merchants_json;
+
+            return $public;
+        }
+
+        if (is_string($row->merchants_json_user)) {
+            $row->merchants_json_user = json_decode($row->merchants_json_user, true);
+        }
+
+        // Attach i18n etc.
+        $journey = Journey::where('journey_code', $journeyCode)
+            ->with(['i18n', 'tags', 'personas', 'markets', 'zones', 'next5'])
+            ->first();
+
+        if ($journey) {
+            $row->journey_i18n_json = $this->formatI18n($journey->i18n);
+            $row->tags_json = $journey->tags->map(fn ($t) => ['tag_code' => $t->tag_code])->values();
+            $row->personas_json = $journey->personas->map(fn ($p) => ['persona_code' => $p->persona_code])->values();
+            $row->markets_json = $journey->markets->map(fn ($m) => ['country_code' => $m->country_code, 'fit_level' => $m->fit_level])->values();
+            $row->zones_json = $journey->zones->map(fn ($z) => ['zone_code' => $z->zone_code, 'fit_level' => $z->fit_level])->values();
+            $row->luxury_tone_json = ['th' => ['tone' => $row->luxury_tone_th], 'en' => ['tone' => $row->luxury_tone_en]];
+            $row->next5_json = $journey->next5->map(fn ($n) => ['next_rank' => $n->next_rank, 'next_journey_code' => $n->next_journey_code])->values();
+        }
+
+        return $row;
+    }
+
+    // ────────────────────────────────────────────────────────
+    // Merchant Search (View-based)
+    // ────────────────────────────────────────────────────────
+
+    /**
+     * GET /api/merchants/search
+     * Uses: vw_merchant_search_public + vw_merchant_search_blob_public
+     */
+    public function searchPublic(array $filters): array
+    {
+        $query = DB::table('vw_merchant_search_public as p')
+            ->leftJoin('vw_merchant_search_blob_public as b', function ($j) {
+                $j->on('b.merchant_id', '=', 'p.merchant_id')
+                    ->on('b.journey_id', '=', 'p.journey_code'); // journey_id matched via view
+            });
+
+        $this->applyPublicFilters($query, $filters, 'p');
+
+        $query->orderByRaw('p.journey_code, p.step_no, p.is_primary DESC, p.sort_order');
+
+        $limit = min((int) ($filters['limit'] ?? 50), 200);
+        $offset = max((int) ($filters['offset'] ?? 0), 0);
+
+        $total = (clone $query)->count();
+        $rows = $query->select('p.*')->limit($limit)->offset($offset)->get();
 
         return [
-            'journey_id' => $journey->journey_id,
-            'journey_code' => $journey->journey_code,
-            'journey_name_th' => $journey->journey_name_th,
-            'journey_name_en' => $journey->journey_name_en,
-            'group_size' => $journey->group_size,
-            'gmv_per_person' => $journey->gmv_per_person,
-            'gmv_per_group' => $journey->gmv_per_group,
-            'tp_total_normal' => $journey->tp_total_normal,
-            'tp_total_goal' => $journey->tp_total_goal,
-            'tp_total_special' => $journey->tp_total_special,
-            'total_minutes_sum' => $journey->total_minutes_sum,
-            'journey_i18n_json' => $this->formatI18n($journey->i18n),
-            'tags_json' => $journey->tags->map(fn ($t) => ['tag_code' => $t->tag_code]),
-            'personas_json' => $journey->personas->map(fn ($p) => ['persona_code' => $p->persona_code]),
-            'markets_json' => $journey->markets->map(fn ($m) => [
-                'country_code' => $m->country_code,
-                'fit_level' => $m->fit_level,
-            ]),
-            'zones_json' => $journey->zones->map(fn ($z) => [
-                'zone_code' => $z->zone_code,
-                'fit_level' => $z->fit_level,
-            ]),
-            'luxury_tone_json' => [
-                'th' => ['tone' => $journey->luxury_tone_th],
-                'en' => ['tone' => $journey->luxury_tone_en],
-            ],
-            'next5_json' => $journey->next5->map(fn ($n) => [
-                'next_rank' => $n->next_rank,
-                'next_journey_code' => $n->next_journey_code,
-            ]),
-            'merchants_json' => $merchants,
-            ...$stats,
+            'data' => $rows,
+            'meta' => ['total' => $total, 'limit' => $limit, 'offset' => $offset],
         ];
     }
 
     /**
-     * Journey one-call: user context (includes user state per merchant).
+     * GET /api/merchants/search/user
+     * Uses: vw_merchant_search_user
      */
-    public function journeyOneCallUser(string $journeyCode, int $userId): ?array
+    public function searchUser(int $userId, array $filters): array
     {
-        $base = $this->journeyOneCallPublic($journeyCode);
-        if (! $base) {
-            return null;
-        }
+        $query = DB::table('vw_merchant_search_user as p')
+            ->where('p.user_id', $userId);
 
-        $merchantIds = collect($base['merchants_json'])->pluck('merchant_id')->unique()->values();
-
-        $visitCounts = MerchantCheckin::where('user_id', $userId)
-            ->whereIn('merchant_id', $merchantIds)
-            ->selectRaw('merchant_id, COUNT(*) as cnt, MAX(created_at) as last_at')
-            ->groupBy('merchant_id')
-            ->get()
-            ->keyBy('merchant_id');
-
-        $favIds = MerchantFavorite::where('user_id', $userId)
-            ->whereIn('merchant_id', $merchantIds)
-            ->pluck('merchant_id')
-            ->flip();
-
-        $wishIds = MerchantWishlist::where('user_id', $userId)
-            ->whereIn('merchant_id', $merchantIds)
-            ->pluck('merchant_id')
-            ->flip();
-
-        $userReviews = MerchantReview::where('user_id', $userId)
-            ->whereIn('merchant_id', $merchantIds)
-            ->selectRaw('merchant_id, COUNT(*) as cnt, MAX(created_at) as last_at, MAX(rating) as last_rating')
-            ->groupBy('merchant_id')
-            ->get()
-            ->keyBy('merchant_id');
-
-        $merchantsWithState = collect($base['merchants_json'])->map(function ($m) use ($visitCounts, $favIds, $wishIds, $userReviews) {
-            $mid = $m['merchant_id'];
-            $vc = $visitCounts->get($mid);
-            $rv = $userReviews->get($mid);
-
-            $m['user_state'] = [
-                'visit_count' => $vc?->cnt ?? 0,
-                'last_checkin_at' => $vc?->last_at,
-                'visited' => ($vc?->cnt ?? 0) > 0 ? 1 : 0,
-                'is_favorite' => $favIds->has($mid) ? 1 : 0,
-                'is_wishlist' => $wishIds->has($mid) ? 1 : 0,
-                'review_count_by_user' => $rv?->cnt ?? 0,
-                'last_review_at' => $rv?->last_at,
-                'last_rating' => $rv?->last_rating,
-            ];
-
-            return $m;
-        });
-
-        $base['user_id'] = $userId;
-        $base['merchants_json_user'] = $merchantsWithState;
-
-        return $base;
-    }
-
-    /**
-     * Public merchant search with filters.
-     */
-    public function searchPublic(array $filters): LengthAwarePaginator
-    {
-        $query = Merchant::active()
-            ->join('place_merchant', 'merchant.merchant_id', '=', 'place_merchant.merchant_id')
-            ->join('place', 'place.place_id', '=', 'place_merchant.place_id')
-            ->leftJoin('journey_step', 'journey_step.place_id', '=', 'place.place_id')
-            ->leftJoin('journey', 'journey.journey_id', '=', 'journey_step.journey_id')
-            ->select([
-                'merchant.merchant_id', 'merchant.merchant_code',
-                'merchant.merchant_name_th', 'merchant.merchant_name_en',
-                'merchant.default_tier_code as tier_code',
-                'merchant.price_level', 'merchant.open_hours', 'merchant.service_tags',
-                'place.place_code', 'place.place_name_th', 'place.place_name_en',
-                'place_merchant.is_primary', 'place_merchant.sort_order',
-                'journey.journey_code', 'journey_step.step_no',
-            ])
-            ->selectRaw('COALESCE((SELECT AVG(r.rating) FROM merchant_review r WHERE r.merchant_id = merchant.merchant_id AND r.status = "PUBLISHED" AND r.is_public = 1), 0) as avg_rating')
-            ->selectRaw('(SELECT COUNT(*) FROM merchant_review r WHERE r.merchant_id = merchant.merchant_id AND r.status = "PUBLISHED" AND r.is_public = 1) as review_count');
-
-        $this->applyPublicFilters($query, $filters);
-
-        $query->orderByRaw('journey.journey_code, journey_step.step_no, place_merchant.is_primary DESC, place_merchant.sort_order');
-
-        $limit = min((int) ($filters['limit'] ?? 50), 200);
-        $page = max((int) ($filters['page'] ?? 1), 1);
-
-        return $query->paginate($limit, ['*'], 'page', $page);
-    }
-
-    /**
-     * User-context merchant search (adds user state).
-     */
-    public function searchUser(int $userId, array $filters): LengthAwarePaginator
-    {
-        $query = Merchant::active()
-            ->join('place_merchant', 'merchant.merchant_id', '=', 'place_merchant.merchant_id')
-            ->join('place', 'place.place_id', '=', 'place_merchant.place_id')
-            ->leftJoin('journey_step', 'journey_step.place_id', '=', 'place.place_id')
-            ->leftJoin('journey', 'journey.journey_id', '=', 'journey_step.journey_id')
-            ->leftJoin('merchant_favorite as mf', function ($j) use ($userId) {
-                $j->on('mf.merchant_id', '=', 'merchant.merchant_id')
-                    ->where('mf.user_id', $userId);
-            })
-            ->leftJoin('merchant_wishlist as mw', function ($j) use ($userId) {
-                $j->on('mw.merchant_id', '=', 'merchant.merchant_id')
-                    ->where('mw.user_id', $userId);
-            })
-            ->select([
-                'merchant.merchant_id', 'merchant.merchant_code',
-                'merchant.merchant_name_th', 'merchant.merchant_name_en',
-                'merchant.default_tier_code as tier_code',
-                'merchant.price_level', 'merchant.open_hours', 'merchant.service_tags',
-                'place.place_code', 'place.place_name_th',
-                'place_merchant.is_primary', 'place_merchant.sort_order',
-                'journey.journey_code', 'journey_step.step_no',
-            ])
-            ->selectRaw('IF(mf.id IS NOT NULL, 1, 0) as is_favorite')
-            ->selectRaw('IF(mw.id IS NOT NULL, 1, 0) as is_wishlist')
-            ->selectRaw('COALESCE((SELECT COUNT(*) FROM merchant_checkin mc WHERE mc.merchant_id = merchant.merchant_id AND mc.user_id = ?), 0) as visit_count', [$userId])
-            ->selectRaw('IF((SELECT COUNT(*) FROM merchant_checkin mc WHERE mc.merchant_id = merchant.merchant_id AND mc.user_id = ?) > 0, 1, 0) as visited', [$userId])
-            ->selectRaw('COALESCE((SELECT AVG(r.rating) FROM merchant_review r WHERE r.merchant_id = merchant.merchant_id AND r.status = "PUBLISHED" AND r.is_public = 1), 0) as avg_rating')
-            ->selectRaw('(SELECT COUNT(*) FROM merchant_review r WHERE r.merchant_id = merchant.merchant_id AND r.status = "PUBLISHED" AND r.is_public = 1) as review_count')
-            ->selectRaw('COALESCE((SELECT COUNT(*) FROM merchant_review r WHERE r.merchant_id = merchant.merchant_id AND r.user_id = ?), 0) as review_count_by_user', [$userId])
-            ->selectRaw('(SELECT MAX(r.rating) FROM merchant_review r WHERE r.merchant_id = merchant.merchant_id AND r.user_id = ?) as last_rating_by_user', [$userId]);
-
-        $this->applyPublicFilters($query, $filters);
+        $this->applyPublicFilters($query, $filters, 'p');
 
         if (isset($filters['visited'])) {
-            if ((int) $filters['visited'] === 1) {
-                $query->whereRaw('(SELECT COUNT(*) FROM merchant_checkin mc WHERE mc.merchant_id = merchant.merchant_id AND mc.user_id = ?) > 0', [$userId]);
-            } else {
-                $query->whereRaw('(SELECT COUNT(*) FROM merchant_checkin mc WHERE mc.merchant_id = merchant.merchant_id AND mc.user_id = ?) = 0', [$userId]);
-            }
+            $query->where('p.visited', (int) $filters['visited']);
         }
         if (isset($filters['is_favorite'])) {
-            if ((int) $filters['is_favorite'] === 1) {
-                $query->whereNotNull('mf.id');
-            } else {
-                $query->whereNull('mf.id');
-            }
+            $query->where('p.is_favorite', (int) $filters['is_favorite']);
         }
         if (isset($filters['is_wishlist'])) {
-            if ((int) $filters['is_wishlist'] === 1) {
-                $query->whereNotNull('mw.id');
-            } else {
-                $query->whereNull('mw.id');
-            }
+            $query->where('p.is_wishlist', (int) $filters['is_wishlist']);
         }
 
-        $query->orderByRaw('journey.journey_code, journey_step.step_no, place_merchant.is_primary DESC, place_merchant.sort_order');
+        $query->orderByRaw('p.journey_code, p.step_no, p.is_primary DESC, p.sort_order');
 
         $limit = min((int) ($filters['limit'] ?? 50), 200);
-        $page = max((int) ($filters['page'] ?? 1), 1);
+        $offset = max((int) ($filters['offset'] ?? 0), 0);
 
-        return $query->paginate($limit, ['*'], 'page', $page);
+        $total = (clone $query)->count();
+        $rows = $query->select('p.*')->limit($limit)->offset($offset)->get();
+
+        return [
+            'data' => $rows,
+            'meta' => ['total' => $total, 'limit' => $limit, 'offset' => $offset],
+        ];
     }
 
+    // ────────────────────────────────────────────────────────
+    // Merchants by Place / Journey (View-based)
+    // ────────────────────────────────────────────────────────
+
     /**
-     * Merchants by place code.
+     * GET /api/places/{place_code}/merchants
+     * Uses: vw_merchant_search_public
      */
     public function merchantsByPlace(string $placeCode): Collection
     {
-        $place = Place::byCode($placeCode)->first();
-        if (! $place) {
-            return collect();
-        }
-
-        return $place->merchants()
-            ->where('merchant.is_active', true)
-            ->get()
-            ->map(fn ($m) => $this->formatMerchantRow($m, $place));
+        return DB::table('vw_merchant_search_public')
+            ->where('place_code', $placeCode)
+            ->orderByRaw('is_primary DESC, sort_order, merchant_code')
+            ->get();
     }
 
     /**
-     * Merchants by journey (normalized rows).
+     * GET /api/journeys/{code}/merchants/rows
+     * Uses: vw_merchant_search_public
      */
     public function merchantsByJourney(string $journeyCode): Collection
     {
-        $journey = Journey::active()->byCode($journeyCode)
-            ->with(['steps.place.merchants' => fn ($q) => $q->where('merchant.is_active', true)])
-            ->first();
-
-        if (! $journey) {
-            return collect();
-        }
-
-        return $this->buildMerchantsJsonFromSteps($journey->steps);
+        return DB::table('vw_merchant_search_public')
+            ->where('journey_code', $journeyCode)
+            ->orderByRaw('step_no, is_primary DESC, sort_order, merchant_code')
+            ->get();
     }
 
     /**
-     * Merchant stats per journey.
+     * GET /api/journeys/{code}/merchants (JSON version)
+     * Uses: vw_journey_place_merchant_json
      */
-    public function journeyMerchantStats(string $journeyCode): ?array
+    public function journeyMerchantsJson(string $journeyCode): ?object
     {
-        $merchants = $this->merchantsByJourney($journeyCode);
-        if ($merchants->isEmpty()) {
-            return null;
-        }
-
-        return $this->computeMerchantStats($merchants);
+        return DB::table('vw_journey_place_merchant_json')
+            ->where('journey_code', $journeyCode)
+            ->first();
     }
 
     /**
-     * Merchant reviews (public, published).
+     * GET /api/journeys/{code}/merchants?user_id=123
+     * Uses: vw_journey_merchant_json_user
+     */
+    public function journeyMerchantsJsonUser(string $journeyCode, int $userId): ?object
+    {
+        return DB::table('vw_journey_merchant_json_user')
+            ->where('journey_code', $journeyCode)
+            ->where('user_id', $userId)
+            ->first();
+    }
+
+    /**
+     * GET /api/journeys/{code}/merchant-stats
+     * Uses: vw_journey_merchant_stats
+     */
+    public function journeyMerchantStats(string $journeyCode): ?object
+    {
+        return DB::table('vw_journey_merchant_stats')
+            ->where('journey_code', $journeyCode)
+            ->first();
+    }
+
+    // ────────────────────────────────────────────────────────
+    // Reviews (direct table query)
+    // ────────────────────────────────────────────────────────
+
+    /**
+     * GET /api/merchant/{id}/reviews
      */
     public function merchantReviews(int $merchantId, int $limit = 20, int $offset = 0): Collection
     {
-        return MerchantReview::where('merchant_id', $merchantId)
-            ->published()
+        return DB::table('merchant_review')
+            ->where('merchant_id', $merchantId)
+            ->where('status', 'PUBLISHED')
+            ->where('is_public', 1)
             ->select(['review_id', 'user_id', 'merchant_id', 'place_id', 'journey_id', 'rating', 'title', 'review_text', 'created_at', 'updated_at'])
             ->orderByDesc('created_at')
             ->limit($limit)
@@ -296,8 +247,12 @@ class MerchantService
             ->get();
     }
 
+    // ────────────────────────────────────────────────────────
+    // User Actions (direct table mutations)
+    // ────────────────────────────────────────────────────────
+
     /**
-     * Check-in a user at a merchant.
+     * POST /api/merchant/checkin
      */
     public function checkin(array $data): MerchantCheckin
     {
@@ -318,45 +273,35 @@ class MerchantService
     }
 
     /**
-     * Toggle favorite.
+     * POST /api/merchant/favorite/toggle
      */
     public function toggleFavorite(int $userId, int $merchantId, bool $isFavorite): bool
     {
         if ($isFavorite) {
-            MerchantFavorite::firstOrCreate([
-                'user_id' => $userId,
-                'merchant_id' => $merchantId,
-            ]);
+            MerchantFavorite::firstOrCreate(['user_id' => $userId, 'merchant_id' => $merchantId]);
         } else {
-            MerchantFavorite::where('user_id', $userId)
-                ->where('merchant_id', $merchantId)
-                ->delete();
+            MerchantFavorite::where('user_id', $userId)->where('merchant_id', $merchantId)->delete();
         }
 
         return $isFavorite;
     }
 
     /**
-     * Toggle wishlist.
+     * POST /api/merchant/wishlist/toggle
      */
     public function toggleWishlist(int $userId, int $merchantId, bool $isWishlist): bool
     {
         if ($isWishlist) {
-            MerchantWishlist::firstOrCreate([
-                'user_id' => $userId,
-                'merchant_id' => $merchantId,
-            ]);
+            MerchantWishlist::firstOrCreate(['user_id' => $userId, 'merchant_id' => $merchantId]);
         } else {
-            MerchantWishlist::where('user_id', $userId)
-                ->where('merchant_id', $merchantId)
-                ->delete();
+            MerchantWishlist::where('user_id', $userId)->where('merchant_id', $merchantId)->delete();
         }
 
         return $isWishlist;
     }
 
     /**
-     * Create a review.
+     * POST /api/merchant/review
      */
     public function createReview(array $data): MerchantReview
     {
@@ -376,106 +321,46 @@ class MerchantService
         ]);
     }
 
-    // ─── Private helpers ───
+    // ────────────────────────────────────────────────────────
+    // Private helpers
+    // ────────────────────────────────────────────────────────
 
-    private function buildMerchantsJsonFromSteps(Collection $steps): Collection
+    private function applyPublicFilters($query, array $filters, string $alias = 'p'): void
     {
-        $rows = collect();
-        foreach ($steps as $step) {
-            if (! $step->place) {
-                continue;
-            }
-            foreach ($step->place->merchants as $merchant) {
-                $rows->push([
-                    'step_no' => $step->step_no,
-                    'place_id' => $step->place->place_id,
-                    'place_code' => $step->place->place_code,
-                    'place_name_th' => $step->place->place_name_th,
-                    'place_name_en' => $step->place->place_name_en,
-                    'merchant_id' => $merchant->merchant_id,
-                    'merchant_code' => $merchant->merchant_code,
-                    'merchant_name_th' => $merchant->merchant_name_th,
-                    'merchant_name_en' => $merchant->merchant_name_en,
-                    'tier_code' => $merchant->default_tier_code,
-                    'is_primary' => (int) $merchant->pivot->is_primary,
-                    'sort_order' => $merchant->pivot->sort_order,
-                    'open_hours' => $merchant->open_hours,
-                    'service_tags' => $merchant->service_tags,
-                    'avg_rating' => round((float) $merchant->publishedReviews()->avg('rating'), 2),
-                    'review_count' => $merchant->publishedReviews()->count(),
-                ]);
-            }
+        if (! empty($filters['journey_code'])) {
+            $query->where("{$alias}.journey_code", $filters['journey_code']);
         }
-
-        return $rows;
-    }
-
-    private function computeMerchantStats(Collection $merchants): array
-    {
-        return [
-            'merchant_rows' => $merchants->count(),
-            'merchant_distinct_count' => $merchants->pluck('merchant_id')->unique()->count(),
-            'place_with_merchant_count' => $merchants->pluck('place_id')->unique()->count(),
-            'merchant_avg_rating' => $merchants->avg('avg_rating') ? round($merchants->avg('avg_rating'), 2) : 0,
-            'merchant_primary_rows' => $merchants->where('is_primary', 1)->count(),
-        ];
+        if (! empty($filters['place_code'])) {
+            $query->where("{$alias}.place_code", $filters['place_code']);
+        }
+        if (! empty($filters['tier_code'])) {
+            $query->where("{$alias}.tier_code", $filters['tier_code']);
+        }
+        if (! empty($filters['price_level'])) {
+            $query->where("{$alias}.price_level", (int) $filters['price_level']);
+        }
+        if (! empty($filters['min_rating'])) {
+            $query->where("{$alias}.avg_rating", '>=', (float) $filters['min_rating']);
+        }
+        if (! empty($filters['q'])) {
+            $term = '%' . $filters['q'] . '%';
+            $query->where(function ($q) use ($term, $alias) {
+                $q->where("{$alias}.merchant_name_th", 'LIKE', $term)
+                    ->orWhere("{$alias}.merchant_name_en", 'LIKE', $term)
+                    ->orWhere("{$alias}.service_tags", 'LIKE', $term)
+                    ->orWhere("{$alias}.place_name_th", 'LIKE', $term)
+                    ->orWhere("{$alias}.place_name_en", 'LIKE', $term);
+            });
+        }
     }
 
     private function formatI18n(Collection $i18n): array
     {
         $result = [];
         foreach ($i18n as $row) {
-            $result[$row->lang] = [
-                'name' => $row->name,
-                'description' => $row->description,
-            ];
+            $result[$row->lang] = ['name' => $row->name, 'description' => $row->description];
         }
 
         return $result;
-    }
-
-    private function formatMerchantRow($merchant, Place $place): array
-    {
-        return [
-            'merchant_id' => $merchant->merchant_id,
-            'merchant_code' => $merchant->merchant_code,
-            'merchant_name_th' => $merchant->merchant_name_th,
-            'merchant_name_en' => $merchant->merchant_name_en,
-            'tier_code' => $merchant->default_tier_code,
-            'is_primary' => (int) $merchant->pivot->is_primary,
-            'sort_order' => $merchant->pivot->sort_order,
-            'place_code' => $place->place_code,
-            'open_hours' => $merchant->open_hours,
-            'service_tags' => $merchant->service_tags,
-        ];
-    }
-
-    private function applyPublicFilters(Builder $query, array $filters): void
-    {
-        if (! empty($filters['journey_code'])) {
-            $query->where('journey.journey_code', $filters['journey_code']);
-        }
-        if (! empty($filters['place_code'])) {
-            $query->where('place.place_code', $filters['place_code']);
-        }
-        if (! empty($filters['tier_code'])) {
-            $query->where('merchant.default_tier_code', $filters['tier_code']);
-        }
-        if (! empty($filters['price_level'])) {
-            $query->where('merchant.price_level', (int) $filters['price_level']);
-        }
-        if (! empty($filters['min_rating'])) {
-            $query->havingRaw('avg_rating >= ?', [(float) $filters['min_rating']]);
-        }
-        if (! empty($filters['q'])) {
-            $term = '%' . $filters['q'] . '%';
-            $query->where(function ($q) use ($term) {
-                $q->where('merchant.merchant_name_th', 'LIKE', $term)
-                    ->orWhere('merchant.merchant_name_en', 'LIKE', $term)
-                    ->orWhere('merchant.service_tags', 'LIKE', $term)
-                    ->orWhere('place.place_name_th', 'LIKE', $term)
-                    ->orWhere('place.place_name_en', 'LIKE', $term);
-            });
-        }
     }
 }
