@@ -7,6 +7,12 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // These views use MySQL-specific functions (JSON_ARRAYAGG, CONCAT_WS, IF, etc.)
+        // Skip on non-MySQL drivers (e.g. SQLite used in tests)
+        if (DB::getDriverName() !== 'mysql') {
+            return;
+        }
+
         // ── 1) vw_journey_merchant_stats ──
         // KPI summary per journey
         DB::statement("
@@ -303,6 +309,10 @@ return new class extends Migration
 
     public function down(): void
     {
+        if (DB::getDriverName() !== 'mysql') {
+            return;
+        }
+
         DB::statement('DROP VIEW IF EXISTS vw_api_journey_onecall_with_merchants_user');
         DB::statement('DROP VIEW IF EXISTS vw_api_journey_onecall_with_merchants_stats_final');
         DB::statement('DROP VIEW IF EXISTS vw_journey_merchant_json_user');
