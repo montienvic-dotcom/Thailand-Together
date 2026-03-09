@@ -16,6 +16,10 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             PlatformSeeder::class,
+            PlaceSeeder::class,
+            JourneySeeder::class,
+            JourneyStepSeeder::class,
+            MerchantDemoSeeder::class,
         ]);
     }
 }

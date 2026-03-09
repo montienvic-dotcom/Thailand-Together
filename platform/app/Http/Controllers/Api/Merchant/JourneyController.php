@@ -15,9 +15,8 @@ class JourneyController extends Controller
 
     /**
      * GET /api/journeys/{journey_code}/onecall/final
-     *
-     * Public one-call (no user_id) → full journey + merchants + stats.
-     * With ?user_id=123 → adds user_state per merchant.
+     * Uses view: vw_api_journey_onecall_with_merchants_stats_final (public)
+     *            vw_api_journey_onecall_with_merchants_user (with ?user_id=)
      */
     public function oneCallFinal(Request $request, string $journeyCode): JsonResponse
     {
@@ -38,8 +37,7 @@ class JourneyController extends Controller
 
     /**
      * GET /api/journeys/{journey_code}/merchants/rows
-     *
-     * Normalized merchant rows for a journey.
+     * Uses view: vw_merchant_search_public
      */
     public function merchantRows(string $journeyCode): JsonResponse
     {
@@ -53,43 +51,47 @@ class JourneyController extends Controller
 
     /**
      * GET /api/journeys/{journey_code}/merchants
-     *
-     * Journey merchants with user context.
+     * Uses view: vw_journey_place_merchant_json / vw_journey_merchant_json_user
      */
     public function journeyMerchants(Request $request, string $journeyCode): JsonResponse
     {
         $userId = $request->query('user_id');
-        $lang = $request->query('lang', 'th');
 
         if ($userId) {
-            $data = $this->merchantService->journeyOneCallUser($journeyCode, (int) $userId);
-            if (! $data) {
+            $row = $this->merchantService->journeyMerchantsJsonUser($journeyCode, (int) $userId);
+            if (! $row) {
                 return response()->json(['error' => 'Journey not found'], 404);
             }
+
+            $merchants = is_string($row->merchants_json) ? json_decode($row->merchants_json, true) : $row->merchants_json;
 
             return response()->json([
                 'data' => [
                     'journey_code' => $journeyCode,
                     'user_id' => (int) $userId,
-                    'merchants' => $data['merchants_json_user'],
+                    'merchants' => $merchants,
                 ],
             ]);
         }
 
-        $rows = $this->merchantService->merchantsByJourney($journeyCode);
+        $row = $this->merchantService->journeyMerchantsJson($journeyCode);
+        if (! $row) {
+            return response()->json(['error' => 'Journey not found'], 404);
+        }
+
+        $merchants = is_string($row->merchants_json) ? json_decode($row->merchants_json, true) : $row->merchants_json;
 
         return response()->json([
             'data' => [
                 'journey_code' => $journeyCode,
-                'merchants' => $rows,
+                'merchants' => $merchants,
             ],
         ]);
     }
 
     /**
      * GET /api/journeys/{journey_code}/merchant-stats
-     *
-     * Summary KPIs per journey.
+     * Uses view: vw_journey_merchant_stats
      */
     public function merchantStats(string $journeyCode): JsonResponse
     {
