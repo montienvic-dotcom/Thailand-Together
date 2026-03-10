@@ -5,6 +5,7 @@ namespace App\Models\Merchant;
 use App\Models\Traits\BelongsToCluster;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Place extends Model
 {
@@ -31,6 +32,11 @@ class Place extends Model
             ->withPivot(['is_primary', 'sort_order'])
             ->orderByPivot('is_primary', 'desc')
             ->orderByPivot('sort_order');
+    }
+
+    public function i18n(): HasMany
+    {
+        return $this->hasMany(PlaceI18n::class, 'place_id', 'place_id');
     }
 
     public function scopeByCode($query, string $code)

@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             PlatformSeeder::class,
             RolePermissionSeeder::class,
+            MasterDataSeeder::class,
             PlaceSeeder::class,
             JourneySeeder::class,
             JourneyStepSeeder::class,
