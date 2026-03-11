@@ -1,0 +1,10 @@
+platform/vendor
+platform/node_modules
+platform/storage/logs/*
+platform/storage/framework/cache/*
+platform/storage/framework/sessions/*
+platform/storage/framework/views/*
+platform/.env
+docker/.env
+*.log
+.git

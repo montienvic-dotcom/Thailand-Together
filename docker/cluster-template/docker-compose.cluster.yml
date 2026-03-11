@@ -1,0 +1,101 @@
+version: "3.8"
+
+# Thailand Together - Cluster Template
+# Usage: Copy this directory, set CLUSTER_CODE, and run:
+#   CLUSTER_CODE=chiangmai docker compose -f docker-compose.cluster.yml up -d
+#
+# This template extends the global compose with cluster-specific overrides.
+# Each cluster gets isolated: database, cache, search index, and container namespace.
+
+services:
+  app:
+    build:
+      context: ../..
+      dockerfile: docker/global/php/Dockerfile
+    container_name: tt-app-${CLUSTER_CODE}
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - ../../platform:/var/www/html
+      - ../../patches:/var/www/patches
+      - ./php/php-cluster.ini:/usr/local/etc/php/conf.d/cluster.ini:ro
+    environment:
+      - APP_ENV=${APP_ENV:-production}
+      - CLUSTER_CODE=${CLUSTER_CODE}
+      - COUNTRY_CODE=${COUNTRY_CODE:-TH}
+      - DB_DATABASE=${CLUSTER_CODE}_db
+      - REDIS_PREFIX=${CLUSTER_CODE}_
+    env_file:
+      - .env
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - tt-cluster-${CLUSTER_CODE}
+      - tt-global
+
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: tt-nginx-${CLUSTER_CODE}
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-8080}:80"
+    volumes:
+      - ../../platform/public:/var/www/html/public:ro
+      - ./nginx/cluster.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - app
+    networks:
+      - tt-cluster-${CLUSTER_CODE}
+
+  mysql:
+    image: mysql:8.0
+    container_name: tt-mysql-${CLUSTER_CODE}
+    restart: unless-stopped
+    ports:
+      - "${DB_PORT:-3307}:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-secret}
+      MYSQL_DATABASE: ${CLUSTER_CODE}_db
+      MYSQL_USER: ${DB_USERNAME:-tt_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-tt_password}
+    volumes:
+      - cluster-mysql:/var/lib/mysql
+      - ./mysql/cluster.cnf:/etc/mysql/conf.d/cluster.cnf:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD:-secret}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - tt-cluster-${CLUSTER_CODE}
+
+  redis:
+    image: redis:7-alpine
+    container_name: tt-redis-${CLUSTER_CODE}
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 64mb --maxmemory-policy allkeys-lru
+    volumes:
+      - cluster-redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks:
+      - tt-cluster-${CLUSTER_CODE}
+
+volumes:
+  cluster-mysql:
+    name: tt-mysql-${CLUSTER_CODE}
+  cluster-redis:
+    name: tt-redis-${CLUSTER_CODE}
+
+networks:
+  tt-cluster-${CLUSTER_CODE}:
+    driver: bridge
+  tt-global:
+    external: true
+    name: tt-network-global
