@@ -2,8 +2,11 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ClusterController;
+use App\Http\Controllers\Api\IntegrationController;
 use App\Http\Controllers\Api\Merchant\JourneyController;
 use App\Http\Controllers\Api\Merchant\MerchantController;
+use App\Http\Controllers\Api\Mobile\NotificationController;
+use App\Http\Controllers\Api\Mobile\ProfileController;
 use App\Http\Controllers\SuperApp\MenuController;
 use Illuminate\Support\Facades\Route;
 
@@ -60,6 +63,39 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/auth/session', [AuthController::class, 'session']);
 
     Route::get('/clusters/accessible', [ClusterController::class, 'accessibleClusters']);
+
+    // ── Mobile App Routes (App Together) ──
+    Route::prefix('mobile')->group(function () {
+        Route::get('/profile', [ProfileController::class, 'show']);
+        Route::put('/profile', [ProfileController::class, 'update']);
+        Route::get('/profile/settings', [ProfileController::class, 'settings']);
+
+        Route::get('/notifications', [NotificationController::class, 'index']);
+        Route::post('/notifications/{id}/read', [NotificationController::class, 'markRead']);
+        Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead']);
+        Route::delete('/notifications/{id}', [NotificationController::class, 'destroy']);
+        Route::post('/device-token', [NotificationController::class, 'registerDeviceToken']);
+    });
+
+    // ── Third-Party Integration Routes ──
+    Route::middleware('cluster.aware')->prefix('integrations')->group(function () {
+        // Payment
+        Route::post('/payment/create', [IntegrationController::class, 'createPayment']);
+        Route::get('/payment/{paymentId}/status', [IntegrationController::class, 'paymentStatus']);
+        Route::post('/payment/{paymentId}/refund', [IntegrationController::class, 'refundPayment']);
+
+        // SMS
+        Route::post('/sms/send', [IntegrationController::class, 'sendSms']);
+        Route::post('/sms/otp', [IntegrationController::class, 'sendOtp']);
+
+        // AI Services
+        Route::post('/ai/chat', [IntegrationController::class, 'aiChat']);
+        Route::post('/ai/translate', [IntegrationController::class, 'aiTranslate']);
+        Route::post('/ai/tts', [IntegrationController::class, 'aiTextToSpeech']);
+
+        // Health check
+        Route::get('/health', [IntegrationController::class, 'health']);
+    });
 
     // ── Cluster-Scoped Routes (auth + cluster context) ──
     Route::middleware('cluster.aware')->group(function () {

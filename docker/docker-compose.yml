@@ -1,0 +1,128 @@
+version: "3.8"
+
+# Thailand Together - Global Docker Compose
+# Shared infrastructure for all clusters
+# Each cluster gets its own namespace via CLUSTER_CODE env
+
+services:
+  # ─── Laravel Application ───────────────────────────────────
+  app:
+    build:
+      context: ..
+      dockerfile: docker/global/php/Dockerfile
+    container_name: tt-app-${CLUSTER_CODE:-global}
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - ../platform:/var/www/html
+      - ../patches:/var/www/patches
+    environment:
+      - APP_ENV=${APP_ENV:-production}
+      - CLUSTER_CODE=${CLUSTER_CODE:-pattaya}
+      - COUNTRY_CODE=${COUNTRY_CODE:-TH}
+    env_file:
+      - .env
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - tt-network
+
+  # ─── Nginx Web Server ─────────────────────────────────────
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: tt-nginx-${CLUSTER_CODE:-global}
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-8080}:80"
+    volumes:
+      - ../platform/public:/var/www/html/public:ro
+      - ./global/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - app
+    networks:
+      - tt-network
+
+  # ─── MySQL Database ────────────────────────────────────────
+  mysql:
+    image: mysql:8.0
+    container_name: tt-mysql-${CLUSTER_CODE:-global}
+    restart: unless-stopped
+    ports:
+      - "${DB_PORT:-3306}:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-secret}
+      MYSQL_DATABASE: ${DB_DATABASE:-thailand_together}
+      MYSQL_USER: ${DB_USERNAME:-tt_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-tt_password}
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./global/mysql/my.cnf:/etc/mysql/conf.d/custom.cnf:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD:-secret}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - tt-network
+
+  # ─── Redis Cache & Queue ───────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: tt-redis-${CLUSTER_CODE:-global}
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    command: redis-server --appendonly yes --maxmemory 128mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks:
+      - tt-network
+
+  # ─── Meilisearch (Search Engine) ───────────────────────────
+  meilisearch:
+    image: getmeili/meilisearch:v1.6
+    container_name: tt-search-${CLUSTER_CODE:-global}
+    restart: unless-stopped
+    ports:
+      - "${MEILISEARCH_PORT:-7700}:7700"
+    environment:
+      MEILI_MASTER_KEY: ${MEILISEARCH_KEY:-masterKey}
+      MEILI_ENV: ${APP_ENV:-production}
+    volumes:
+      - meilisearch-data:/meili_data
+    networks:
+      - tt-network
+
+  # ─── Mailpit (Development Only) ────────────────────────────
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: tt-mail-${CLUSTER_CODE:-global}
+    restart: unless-stopped
+    ports:
+      - "${MAIL_PORT:-1025}:1025"
+      - "${MAIL_UI_PORT:-8025}:8025"
+    profiles:
+      - dev
+    networks:
+      - tt-network
+
+volumes:
+  mysql-data:
+    name: tt-mysql-${CLUSTER_CODE:-global}
+  redis-data:
+    name: tt-redis-${CLUSTER_CODE:-global}
+  meilisearch-data:
+    name: tt-search-${CLUSTER_CODE:-global}
+
+networks:
+  tt-network:
+    name: tt-network-${CLUSTER_CODE:-global}
+    driver: bridge
