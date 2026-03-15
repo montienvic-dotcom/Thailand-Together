@@ -161,7 +161,8 @@ class AdminWebController extends Controller
     public function permissionRoles()
     {
         $roles = Role::withCount('users')->get();
-        return view('admin.permissions.roles', compact('roles'));
+        $permissions = \App\Models\Auth\Permission::orderBy('category')->orderBy('name')->get();
+        return view('admin.permissions.roles', compact('roles', 'permissions'));
     }
 
     // ── Reference ──

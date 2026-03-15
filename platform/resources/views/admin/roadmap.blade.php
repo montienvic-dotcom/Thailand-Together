@@ -17,6 +17,7 @@
                 ['name' => 'Foundation', 'done' => 8, 'total' => 8],
                 ['name' => 'Core Features', 'done' => 0, 'total' => 12],
                 ['name' => 'Integrations', 'done' => 0, 'total' => 10],
+                ['name' => 'Campaign & Biz', 'done' => 0, 'total' => 10],
                 ['name' => 'Production', 'done' => 0, 'total' => 8],
             ];
             $totalDone = collect($phases)->sum('done');
@@ -443,6 +444,123 @@
         </div>
 
         {{-- ============================================================ --}}
+        {{-- PHASE 5: CAMPAIGN & BUSINESS APIs --}}
+        {{-- ============================================================ --}}
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="bg-teal-50 border-b border-teal-200 px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <span class="flex items-center justify-center w-8 h-8 rounded-full bg-teal-500 text-white font-bold text-sm">5</span>
+                        <div>
+                            <h2 class="font-bold text-teal-900">Phase 5: Campaign & Business APIs / ระบบแคมเปญและธุรกิจ</h2>
+                            <p class="text-xs text-teal-700">Journey, Campaign, Merchant, Booking, Coupon, Review — หัวใจของ Tourism Platform</p>
+                        </div>
+                    </div>
+                    <x-ui.badge color="teal">0/10 Pending</x-ui.badge>
+                </div>
+            </div>
+            <div class="p-6">
+                <div class="space-y-2">
+                    @php
+                        $campaignBiz = [
+                            [
+                                'title' => 'Campaign Management System',
+                                'priority' => 'Critical',
+                                'desc' => 'ระบบจัดการแคมเปญ — Global, Country, Cluster level campaigns พร้อม targeting rules',
+                                'tasks' => ['Campaign model (name, type, scope, start/end date, budget, status)', 'Campaign types: discount, reward-boost, flash-sale, cross-cluster, referral', 'Targeting rules engine (persona, segment, market, zone)', 'Campaign scheduler (auto start/stop)', 'Budget tracking & spend limits', 'A/B testing support', 'Campaign analytics dashboard', 'Cross-cluster campaign federation', 'Campaign approval workflow (draft → review → active)'],
+                            ],
+                            [
+                                'title' => 'Journey Builder & Customer Journey',
+                                'priority' => 'Critical',
+                                'desc' => 'ออกแบบ customer journey — ตั้งแต่ discover → book → experience → review → reward',
+                                'tasks' => ['Journey model (stages, triggers, actions, conditions)', 'Visual journey builder UI (drag & drop nodes)', 'Journey stages: Awareness, Consideration, Booking, Pre-trip, On-trip, Post-trip', 'Trigger system (event-based: signup, first-booking, visit-location)', 'Action system (send notification, award points, show offer, assign tag)', 'Condition branching (if/else based on user attributes)', 'Journey analytics (funnel, drop-off, conversion rate)', 'Journey templates (pre-built journeys for common flows)', 'Journey A/B split testing'],
+                            ],
+                            [
+                                'title' => 'Merchant Management System',
+                                'priority' => 'Critical',
+                                'desc' => 'ระบบร้านค้า/ผู้ประกอบการ — สมัคร อนุมัติ จัดการ แดชบอร์ด',
+                                'tasks' => ['Merchant model (business info, category, location, contact, documents)', 'Merchant registration with document upload', 'Admin approval workflow (pending → approved → active)', 'Merchant dashboard (sales, bookings, reviews, points)', 'Merchant profile page (public-facing)', 'Merchant categories: hotel, restaurant, tour, transport, shop, spa, activity', 'Multi-branch support per merchant', 'Merchant-level analytics & reports', 'Commission/fee structure per merchant type', 'Merchant API access (own data)'],
+                            ],
+                            [
+                                'title' => 'Booking & Reservation Engine',
+                                'priority' => 'Critical',
+                                'desc' => 'ระบบจอง — Hotel, Tour, Activity, Restaurant, Transport',
+                                'tasks' => ['Booking model (merchant, user, type, date, status, payment)', 'Real-time availability check API', 'Booking calendar with slot management', 'Booking confirmation & voucher (QR code)', 'Cancellation & refund policy engine', 'Booking reminders (email/SMS/push)', 'Group booking support', 'Waitlist management', 'Check-in/check-out tracking', 'Booking history & rebooking'],
+                            ],
+                            [
+                                'title' => 'Coupon & Promotion System',
+                                'priority' => 'High',
+                                'desc' => 'ระบบคูปองและโปรโมชั่น — สร้าง แจก ใช้ ตรวจสอบ',
+                                'tasks' => ['Coupon model (code, type, discount, conditions, expiry, usage-limit)', 'Coupon types: percentage, fixed-amount, free-item, buy-x-get-y', 'Auto-generate unique coupon codes (batch)', 'Redemption validation (min-spend, specific merchant, date range)', 'Coupon distribution via campaign, journey, or direct', 'Usage tracking & fraud detection', 'Coupon stacking rules', 'Merchant-funded vs platform-funded coupons', 'QR code coupon redemption at POS'],
+                            ],
+                            [
+                                'title' => 'Review & Rating System',
+                                'priority' => 'High',
+                                'desc' => 'ระบบรีวิว — นักท่องเที่ยวรีวิวร้านค้า, ทัวร์, ที่พัก',
+                                'tasks' => ['Review model (user, merchant, rating, text, photos, verified-booking)', 'Star rating (1-5) with category breakdown', 'Photo/video upload with review', 'Verified purchase badge', 'Merchant response to reviews', 'Review moderation (auto-flag inappropriate content)', 'Review analytics (sentiment analysis via AI)', 'Review incentive (points for review)', 'Aggregate rating calculation & display'],
+                            ],
+                            [
+                                'title' => 'Tourist Persona & Segmentation',
+                                'priority' => 'High',
+                                'desc' => 'ระบบจำแนกนักท่องเที่ยว — personas, segments, markets สำหรับ targeting',
+                                'tasks' => ['Persona model (name, attributes, behavior patterns)', 'Market segments (budget, mid-range, luxury, family, adventure, wellness)', 'Source markets (by country/region of origin)', 'Auto-tagging users based on behavior', 'Segment rules engine (dynamic segmentation)', 'Persona-based content personalization', 'Segment analytics & size tracking', 'Export segments for external marketing'],
+                            ],
+                            [
+                                'title' => 'Zone & Location Management',
+                                'priority' => 'Medium',
+                                'desc' => 'ระบบจัดการพื้นที่ — zones, POI, geofencing สำหรับ location-based features',
+                                'tasks' => ['Zone model (name, polygon/radius, cluster, category)', 'Point of Interest (POI) registry', 'Map-based zone editor (Leaflet/Mapbox)', 'Geofence triggers (enter/exit zone → action)', 'Zone-based content & offers', 'Walking/driving routes between POIs', 'Zone heatmap analytics (popular areas)', 'Zone-based merchant discovery'],
+                            ],
+                            [
+                                'title' => 'Next5 Recommendation Engine',
+                                'priority' => 'Medium',
+                                'desc' => 'ระบบแนะนำ 5 สิ่งถัดไป — AI-powered recommendations based on context',
+                                'tasks' => ['Recommendation model (user, context, items, score)', 'Collaborative filtering (users who liked X also liked Y)', 'Content-based filtering (similar attributes)', 'Context-aware: time, location, weather, persona', 'Next5 API endpoint (GET /api/recommendations/next5)', 'Admin: configure recommendation rules per cluster', 'A/B test recommendation algorithms', 'Feedback loop (click/book/dismiss tracking)', 'Cross-cluster recommendations'],
+                            ],
+                            [
+                                'title' => 'Event & MICE Integration',
+                                'priority' => 'Medium',
+                                'desc' => 'ระบบอีเวนต์ — conferences, exhibitions, meetings, incentives ที่ Pattaya',
+                                'tasks' => ['Event model (name, type, venue, dates, capacity, organizer)', 'Event types: MICE (Meeting, Incentive, Convention, Exhibition), Festival, Concert', 'Event registration & ticketing', 'Event schedule & agenda builder', 'Attendee management & check-in', 'Event-merchant packages (hotel+event bundle)', 'Event promotion via campaign system', 'Post-event survey & feedback', 'Event analytics (attendance, revenue, satisfaction)'],
+                            ],
+                        ];
+                    @endphp
+                    @foreach($campaignBiz as $item)
+                        <div class="border border-gray-200 rounded-lg overflow-hidden" x-data="{ open: false }">
+                            <button @click="open = !open" class="w-full flex items-center gap-3 p-3 text-left hover:bg-gray-50 transition-colors">
+                                <div class="flex-shrink-0 w-5 h-5 rounded border-2 border-gray-300 mt-0.5"></div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center gap-2">
+                                        <p class="text-sm font-medium text-gray-900">{{ $item['title'] }}</p>
+                                        <span @class([
+                                            'text-xs px-1.5 py-0.5 rounded font-medium',
+                                            'bg-red-100 text-red-700' => $item['priority'] === 'Critical',
+                                            'bg-orange-100 text-orange-700' => $item['priority'] === 'High',
+                                            'bg-blue-100 text-blue-700' => $item['priority'] === 'Medium',
+                                        ])>{{ $item['priority'] }}</span>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-0.5">{{ $item['desc'] }}</p>
+                                </div>
+                                <x-icon name="chevron-down" class="w-4 h-4 text-gray-400 flex-shrink-0" ::class="open ? 'rotate-180' : ''" />
+                            </button>
+                            <div x-show="open" x-collapse x-cloak class="border-t border-gray-100 px-3 py-3 bg-gray-50">
+                                <p class="text-xs font-semibold text-gray-500 mb-2">Sub-tasks:</p>
+                                <div class="space-y-1.5">
+                                    @foreach($item['tasks'] as $task)
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-3.5 h-3.5 rounded border border-gray-300 flex-shrink-0"></div>
+                                            <span class="text-xs text-gray-700">{{ $task }}</span>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+
+        {{-- ============================================================ --}}
         {{-- RECOMMENDED PRIORITY ORDER --}}
         {{-- ============================================================ --}}
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
@@ -454,14 +572,19 @@
                     $priorities = [
                         ['rank' => 1, 'title' => 'CRUD Operations (Admin Panel)', 'reason' => 'Admin ต้องจัดการข้อมูลได้จริง — เป็นพื้นฐานของทุกอย่าง', 'color' => 'red'],
                         ['rank' => 2, 'title' => 'Permission Management UI', 'reason' => 'ต้องกำหนดสิทธิ์ได้จริงจากหน้าเว็บ — ไม่ใช่แค่ API', 'color' => 'red'],
-                        ['rank' => 3, 'title' => 'User Registration + Email Verification', 'reason' => 'ให้ผู้ใช้สมัครได้ — Tourist, Merchant', 'color' => 'red'],
-                        ['rank' => 4, 'title' => 'Payment Gateway (Stripe + PromptPay)', 'reason' => 'เปิดรับเงินได้ — ระบบจองต้องมีการชำระเงิน', 'color' => 'red'],
-                        ['rank' => 5, 'title' => 'Cloud Point / Reward System', 'reason' => 'หัวใจของ Super App — สะสมแต้ม เพิ่ม engagement', 'color' => 'orange'],
-                        ['rank' => 6, 'title' => 'Testing Suite (80%+ coverage)', 'reason' => 'ป้องกัน bug ก่อนเพิ่มฟีเจอร์ใหม่', 'color' => 'orange'],
-                        ['rank' => 7, 'title' => 'Notification System', 'reason' => 'แจ้งเตือนผู้ใช้ — booking confirmation, promotions', 'color' => 'orange'],
-                        ['rank' => 8, 'title' => 'SMS OTP + 2FA', 'reason' => 'ความปลอดภัย — จำเป็นสำหรับ payment flows', 'color' => 'orange'],
-                        ['rank' => 9, 'title' => 'AI Chatbot Integration', 'reason' => 'ช่วยนักท่องเที่ยว 24/7 — ลดภาระ support', 'color' => 'blue'],
-                        ['rank' => 10, 'title' => 'Docker + CI/CD + Monitoring', 'reason' => 'พร้อม deploy production — automated pipeline', 'color' => 'blue'],
+                        ['rank' => 3, 'title' => 'Merchant Management System', 'reason' => 'ร้านค้าต้องสมัครและจัดการธุรกิจได้ — เป็น supply side ของ platform', 'color' => 'red'],
+                        ['rank' => 4, 'title' => 'Booking & Reservation Engine', 'reason' => 'Core ของ Tourism Platform — จองโรงแรม ทัวร์ กิจกรรม', 'color' => 'red'],
+                        ['rank' => 5, 'title' => 'Payment Gateway (Stripe + PromptPay)', 'reason' => 'เปิดรับเงินได้ — ระบบจองต้องมีการชำระเงิน', 'color' => 'red'],
+                        ['rank' => 6, 'title' => 'Campaign Management System', 'reason' => 'ดึงดูดนักท่องเที่ยว — โปรโมชัน แคมเปญ targeting', 'color' => 'orange'],
+                        ['rank' => 7, 'title' => 'Journey Builder & Customer Journey', 'reason' => 'สร้าง engagement ตลอด trip — discover → book → experience → review', 'color' => 'orange'],
+                        ['rank' => 8, 'title' => 'Cloud Point / Reward + Coupon System', 'reason' => 'หัวใจของ Super App — สะสมแต้ม คูปอง เพิ่ม retention', 'color' => 'orange'],
+                        ['rank' => 9, 'title' => 'Review & Rating System', 'reason' => 'สร้างความน่าเชื่อถือ — นักท่องเที่ยวดูรีวิวก่อนจอง', 'color' => 'orange'],
+                        ['rank' => 10, 'title' => 'SMS OTP + 2FA + Notification', 'reason' => 'ความปลอดภัย + แจ้งเตือน — จำเป็นสำหรับ payment & booking', 'color' => 'orange'],
+                        ['rank' => 11, 'title' => 'Tourist Persona & Segmentation', 'reason' => 'Targeting ที่แม่นยำ — personalized content & offers', 'color' => 'blue'],
+                        ['rank' => 12, 'title' => 'Next5 Recommendation Engine', 'reason' => 'AI แนะนำสิ่งที่ควรทำต่อไป — เพิ่ม discovery & spending', 'color' => 'blue'],
+                        ['rank' => 13, 'title' => 'AI Chatbot + Translation + TTS', 'reason' => 'ช่วยนักท่องเที่ยวต่างชาติ 24/7 — multi-language support', 'color' => 'blue'],
+                        ['rank' => 14, 'title' => 'Testing Suite + Security Hardening', 'reason' => 'ป้องกัน bug & ความปลอดภัยก่อน go-live', 'color' => 'purple'],
+                        ['rank' => 15, 'title' => 'Docker + CI/CD + Monitoring', 'reason' => 'พร้อม deploy production — automated pipeline', 'color' => 'purple'],
                     ];
                 @endphp
                 @foreach($priorities as $p)
