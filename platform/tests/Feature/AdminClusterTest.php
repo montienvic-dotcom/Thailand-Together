@@ -129,7 +129,7 @@ class AdminClusterTest extends TestCase
         $response->assertOk()
             ->assertJson(['message' => 'Cluster deleted successfully.']);
 
-        $this->assertDatabaseMissing('clusters', [
+        $this->assertSoftDeleted('clusters', [
             'id' => $this->cluster->id,
         ]);
     }
