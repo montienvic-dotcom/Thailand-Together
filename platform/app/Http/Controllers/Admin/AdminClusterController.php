@@ -73,6 +73,49 @@ class AdminClusterController extends Controller
         return response()->json(['message' => 'Cluster deleted successfully.']);
     }
 
+    /**
+     * Sync applications assigned to a cluster.
+     */
+    public function syncApplications(Request $request, Cluster $cluster): JsonResponse
+    {
+        $data = $request->validate([
+            'application_ids' => 'required|array',
+            'application_ids.*' => 'exists:applications,id',
+        ]);
+
+        $syncData = [];
+        foreach ($data['application_ids'] as $appId) {
+            $syncData[$appId] = ['is_active' => true];
+        }
+
+        $cluster->applications()->sync($syncData);
+
+        return response()->json([
+            'message' => 'Applications updated for cluster.',
+            'count' => count($data['application_ids']),
+        ]);
+    }
+
+    /**
+     * Toggle a specific app's active status within a cluster.
+     */
+    public function toggleClusterApp(Request $request, Cluster $cluster, int $applicationId): JsonResponse
+    {
+        $pivot = $cluster->applications()->where('application_id', $applicationId)->first();
+
+        if (!$pivot) {
+            return response()->json(['message' => 'Application not assigned to this cluster.'], 404);
+        }
+
+        $newStatus = !$pivot->pivot->is_active;
+        $cluster->applications()->updateExistingPivot($applicationId, ['is_active' => $newStatus]);
+
+        return response()->json([
+            'message' => $newStatus ? 'Application activated in cluster.' : 'Application deactivated in cluster.',
+            'is_active' => $newStatus,
+        ]);
+    }
+
     public function storeCountry(Request $request): JsonResponse
     {
         $data = $request->validate([

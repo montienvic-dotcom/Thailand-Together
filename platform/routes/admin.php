@@ -89,6 +89,8 @@ Route::middleware(['web', 'auth', 'cluster.aware'])->prefix('admin')->name('admi
     Route::put('/clusters/{cluster}', [AdminClusterController::class, 'update'])->name('clusters.update');
     Route::patch('/clusters/{cluster}/toggle', [AdminClusterController::class, 'toggleActive'])->name('clusters.toggle');
     Route::delete('/clusters/{cluster}', [AdminClusterController::class, 'destroy'])->name('clusters.destroy');
+    Route::put('/clusters/{cluster}/sync-apps', [AdminClusterController::class, 'syncApplications'])->name('clusters.sync-apps');
+    Route::patch('/clusters/{cluster}/apps/{application}/toggle', [AdminClusterController::class, 'toggleClusterApp'])->name('clusters.toggle-app');
 
     Route::post('/countries', [AdminClusterController::class, 'storeCountry'])->name('countries.store');
     Route::put('/countries/{country}', [AdminClusterController::class, 'updateCountry'])->name('countries.update');

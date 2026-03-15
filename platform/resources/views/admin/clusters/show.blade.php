@@ -76,7 +76,12 @@
 
         {{-- Assigned Applications --}}
         <div class="mt-6">
-            <h3 class="text-base font-semibold text-gray-900 mb-3">Assigned Applications ({{ $cluster->applications->count() }})</h3>
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="text-base font-semibold text-gray-900">Assigned Applications ({{ $cluster->applications->count() }})</h3>
+                <x-ui.button variant="primary" size="sm" @click="$dispatch('open-modal-assign-apps')">
+                    <x-icon name="plus" class="w-4 h-4 mr-1" /> Assign Apps
+                </x-ui.button>
+            </div>
             @if($cluster->applications->isNotEmpty())
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                     <x-ui.table>
@@ -84,6 +89,7 @@
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Application</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase hidden sm:table-cell">Type</th>
                             <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Status</th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
                         </x-slot:head>
                         @foreach($cluster->applications as $app)
                             <tr class="hover:bg-gray-50">
@@ -99,9 +105,16 @@
                                     <x-ui.badge :color="$app->type === 'mobile' ? 'purple' : 'blue'" size="sm">{{ ucfirst($app->type) }}</x-ui.badge>
                                 </td>
                                 <td class="px-4 py-3 text-center">
-                                    <x-ui.badge :color="$app->pivot->is_active ? 'green' : 'red'" size="sm">
-                                        {{ $app->pivot->is_active ? 'Active' : 'Inactive' }}
-                                    </x-ui.badge>
+                                    <button @click="toggleClusterApp({{ $app->id }})"
+                                            class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium transition-colors cursor-pointer"
+                                            :class="appStates[{{ $app->id }}] ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-red-100 text-red-700 hover:bg-red-200'">
+                                        <span x-text="appStates[{{ $app->id }}] ? 'Active' : 'Inactive'"></span>
+                                    </button>
+                                </td>
+                                <td class="px-4 py-3 text-right">
+                                    <a href="{{ route('admin.applications.show', $app->id) }}" class="text-gray-400 hover:text-gray-600 p-1" title="View app">
+                                        <x-icon name="arrow-top-right-on-square" class="w-4 h-4 inline" />
+                                    </a>
                                 </td>
                             </tr>
                         @endforeach
@@ -109,10 +122,45 @@
                 </div>
             @else
                 <x-ui.card>
-                    <x-ui.empty-state title="No applications assigned" description="Assign applications to this cluster from the Applications page." icon="cube" />
+                    <x-ui.empty-state title="No applications assigned" description="Click 'Assign Apps' to add applications to this cluster." icon="cube" />
                 </x-ui.card>
             @endif
         </div>
+
+        {{-- Assign Apps Modal --}}
+        <x-ui.modal name="assign-apps" maxWidth="xl">
+            <div class="px-6 py-4 border-b border-gray-100">
+                <h3 class="text-lg font-semibold text-gray-900">Assign Applications to {{ $cluster->name }}</h3>
+            </div>
+            <div class="px-6 py-4 max-h-[60vh] overflow-y-auto">
+                <div class="space-y-2">
+                    @foreach($allApps as $app)
+                        <label class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer border border-gray-100">
+                            <input type="checkbox" value="{{ $app->id }}" x-model="selectedApps"
+                                   class="rounded border-gray-300 text-orange-500 focus:ring-orange-500" />
+                            <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style="background-color: {{ $app->color ?? '#6C757D' }}20">
+                                <x-icon :name="$app->icon ?? 'cube'" class="w-4 h-4" style="color: {{ $app->color ?? '#6C757D' }}" />
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <span class="text-sm font-medium text-gray-900">{{ $app->name }}</span>
+                                <span class="text-xs text-gray-500 ml-2">{{ $app->code }}</span>
+                            </div>
+                            <x-ui.badge :color="$app->type === 'mobile' ? 'purple' : 'blue'" size="sm">{{ ucfirst($app->type) }}</x-ui.badge>
+                        </label>
+                    @endforeach
+                </div>
+            </div>
+            <div class="px-6 py-3 bg-gray-50 border-t border-gray-100 flex justify-between items-center">
+                <span class="text-xs text-gray-500" x-text="selectedApps.length + ' app(s) selected'"></span>
+                <div class="flex gap-2">
+                    <x-ui.button variant="outline" size="sm" @click="$dispatch('close-modal-assign-apps')">Cancel</x-ui.button>
+                    <x-ui.button variant="primary" size="sm" @click="syncApps()" x-bind:disabled="loading">
+                        <template x-if="loading"><x-icon name="arrow-path" class="w-4 h-4 animate-spin mr-1" /></template>
+                        Save Assignments
+                    </x-ui.button>
+                </div>
+            </div>
+        </x-ui.modal>
 
         {{-- Edit Cluster Modal --}}
         <x-ui.modal name="edit-cluster" maxWidth="lg">
@@ -165,6 +213,12 @@
             return {
                 loading: false,
                 clusterActive: {{ $cluster->is_active ? 'true' : 'false' }},
+                selectedApps: @json($cluster->applications->pluck('id')->map(fn($id) => (string) $id)),
+                appStates: {
+                    @foreach($cluster->applications as $app)
+                        {{ $app->id }}: {{ $app->pivot->is_active ? 'true' : 'false' }},
+                    @endforeach
+                },
                 editForm: {
                     name: @json($cluster->name),
                     description: @json($cluster->description ?? ''),
@@ -179,6 +233,34 @@
                 showToast(message, type = 'success') {
                     this.toast = { show: true, message, type };
                     setTimeout(() => this.toast.show = false, 3000);
+                },
+
+                async syncApps() {
+                    this.loading = true;
+                    try {
+                        const res = await fetch('{{ route("admin.clusters.sync-apps", $cluster->id) }}', {
+                            method: 'PUT',
+                            headers: { 'X-CSRF-TOKEN': this.csrfToken(), 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                            body: JSON.stringify({ application_ids: this.selectedApps.map(Number) }),
+                        });
+                        const data = await res.json();
+                        this.showToast(data.message);
+                        this.$dispatch('close-modal-assign-apps');
+                        setTimeout(() => location.reload(), 800);
+                    } catch (e) { this.showToast('Failed to sync apps.', 'error'); }
+                    this.loading = false;
+                },
+
+                async toggleClusterApp(appId) {
+                    try {
+                        const res = await fetch('/admin/clusters/{{ $cluster->id }}/apps/' + appId + '/toggle', {
+                            method: 'PATCH',
+                            headers: { 'X-CSRF-TOKEN': this.csrfToken(), 'Accept': 'application/json' },
+                        });
+                        const data = await res.json();
+                        this.appStates[appId] = data.is_active;
+                        this.showToast(data.message);
+                    } catch (e) { this.showToast('Failed to toggle.', 'error'); }
                 },
 
                 async toggleCluster() {
