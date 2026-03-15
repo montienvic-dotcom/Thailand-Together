@@ -5,6 +5,9 @@ use App\Http\Controllers\Api\ClusterController;
 use App\Http\Controllers\Api\IntegrationController;
 use App\Http\Controllers\Api\Merchant\JourneyController;
 use App\Http\Controllers\Api\Merchant\MerchantController;
+use App\Http\Controllers\Api\Mobile\BookingController;
+use App\Http\Controllers\Api\Mobile\DealController;
+use App\Http\Controllers\Api\Mobile\DiscoverController;
 use App\Http\Controllers\Api\Mobile\NotificationController;
 use App\Http\Controllers\Api\Mobile\ProfileController;
 use App\Http\Controllers\Api\RewardController;
@@ -76,6 +79,28 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead']);
         Route::delete('/notifications/{id}', [NotificationController::class, 'destroy']);
         Route::post('/device-token', [NotificationController::class, 'registerDeviceToken']);
+
+        // ── Discover / Browse (Tourist Experience) ──
+        Route::prefix('discover')->group(function () {
+            Route::get('/home', [DiscoverController::class, 'home']);
+            Route::get('/journeys', [DiscoverController::class, 'journeys']);
+            Route::get('/journeys/{code}', [DiscoverController::class, 'journeyDetail']);
+            Route::get('/merchants', [DiscoverController::class, 'merchants']);
+            Route::get('/merchants/nearby', [DiscoverController::class, 'nearbyMerchants']);
+            Route::get('/merchants/{id}', [DiscoverController::class, 'merchantDetail']);
+            Route::get('/recommendations', [DiscoverController::class, 'recommendations']);
+        });
+
+        // ── Bookings ──
+        Route::get('/bookings', [BookingController::class, 'index']);
+        Route::post('/bookings', [BookingController::class, 'store']);
+        Route::get('/bookings/{id}', [BookingController::class, 'show']);
+        Route::put('/bookings/{id}/cancel', [BookingController::class, 'cancel']);
+
+        // ── Deals & Promotions ──
+        Route::get('/deals', [DealController::class, 'index']);
+        Route::get('/deals/{id}', [DealController::class, 'show']);
+        Route::post('/deals/{id}/redeem', [DealController::class, 'redeem']);
     });
 
     // ── Third-Party Integration Routes ──
