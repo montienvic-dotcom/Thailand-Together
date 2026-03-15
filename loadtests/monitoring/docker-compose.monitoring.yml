@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  prometheus:
+    image: prom/prometheus:v2.51.0
+    container_name: tt-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.retention.time=30d'
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:10.4.0
+    container_name: tt-grafana
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=thailandtogether
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+  node-exporter:
+    image: prom/node-exporter:v1.7.0
+    container_name: tt-node-exporter
+    ports:
+      - "9100:9100"
+    restart: unless-stopped
+
+  mysql-exporter:
+    image: prom/mysqld-exporter:v0.15.1
+    container_name: tt-mysql-exporter
+    ports:
+      - "9104:9104"
+    environment:
+      - DATA_SOURCE_NAME=${DB_USERNAME:-root}:${DB_PASSWORD:-secret}@(${DB_HOST:-mysql}:3306)/
+    restart: unless-stopped
+
+  redis-exporter:
+    image: oliver006/redis_exporter:v1.58.0
+    container_name: tt-redis-exporter
+    ports:
+      - "9121:9121"
+    environment:
+      - REDIS_ADDR=${REDIS_HOST:-redis}:6379
+    restart: unless-stopped
+
+volumes:
+  prometheus_data:
+  grafana_data:

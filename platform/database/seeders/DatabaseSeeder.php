@@ -24,6 +24,7 @@ class DatabaseSeeder extends Seeder
             MerchantDemoSeeder::class,
             JourneyMetaSeeder::class,
             MerchantI18nSeeder::class,
+            PattayaDemoSeeder::class,
         ]);
     }
 }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AdapterController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ClusterController;
 use App\Http\Controllers\Api\IntegrationController;
@@ -150,6 +151,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/redeem', [RewardController::class, 'redeem']);
         Route::post('/transfer', [RewardController::class, 'transfer']);
         Route::get('/exchange-rates', [RewardController::class, 'exchangeRates']);
+    });
+
+    // ── External App Adapters ──
+    Route::prefix('adapters')->group(function () {
+        Route::get('/', [AdapterController::class, 'index']);
+        Route::get('/{name}/health', [AdapterController::class, 'health']);
+        Route::post('/{name}/execute', [AdapterController::class, 'execute']);
     });
 
     // ── Cluster-Scoped Routes (auth + cluster context) ──

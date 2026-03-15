@@ -24,7 +24,11 @@
         "psr-4": {
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
-            "Database\\Seeders\\": "database/seeders/"
+            "Database\\Seeders\\": "database/seeders/",
+            "ThailandTogether\\Adapters\\": "../adapters/",
+            "ThailandTogether\\Adapters\\HotelMgmt\\": "../adapters/hotel-mgmt/",
+            "ThailandTogether\\Adapters\\TourBooking\\": "../adapters/tour-booking/",
+            "ThailandTogether\\Adapters\\Marketplace\\": "../adapters/marketplace/"
         }
     },
     "autoload-dev": {
