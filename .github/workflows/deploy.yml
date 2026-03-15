@@ -6,7 +6,6 @@ on:
   workflow_dispatch:
 
 env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
   PHP_VERSION: '8.4'
   NODE_VERSION: '22'
   DEPLOY_PATH: '~/pattayatogether'
@@ -17,7 +16,7 @@ jobs:
     name: Run Tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -49,7 +48,7 @@ jobs:
     if: github.ref == 'refs/heads/main'
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -63,7 +62,7 @@ jobs:
         run: composer install --no-dev --optimize-autoloader --no-progress
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
@@ -86,7 +85,7 @@ jobs:
           rm -f platform/database/database.sqlite
 
       - name: Deploy via rsync
-        uses: burnett01/rsync-deployments@7.0.1
+        uses: burnett01/rsync-deployments@v8
         with:
           switches: >-
             -avzr --delete
@@ -107,7 +106,7 @@ jobs:
           remote_port: ${{ secrets.SSH_PORT }}
 
       - name: Run post-deploy commands
-        uses: appleboy/ssh-action@v1.2.0
+        uses: appleboy/ssh-action@v1
         env:
           ENV_FILE: ${{ secrets.ENV_FILE }}
         with:
