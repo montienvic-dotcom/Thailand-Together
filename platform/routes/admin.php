@@ -4,6 +4,8 @@ use App\Http\Controllers\Admin\AdminApiProviderController;
 use App\Http\Controllers\Admin\AdminApplicationController;
 use App\Http\Controllers\Admin\AdminClusterController;
 use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\AdminJourneyController;
+use App\Http\Controllers\Admin\AdminMerchantController;
 use App\Http\Controllers\Admin\AdminPermissionController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\AdminWebController;
@@ -68,6 +70,8 @@ Route::middleware(['web', 'auth', 'cluster.aware'])->prefix('admin')->name('admi
     Route::put('/users/{user}/role', [AdminUserController::class, 'updateRole'])->name('users.update-role');
     Route::delete('/users/{user}', [AdminUserController::class, 'destroy'])->name('users.destroy');
     Route::get('/users/{user}/json', [AdminUserController::class, 'show'])->name('users.json');
+    Route::put('/users/{user}/app-access', [AdminUserController::class, 'syncAppAccess'])->name('users.sync-app-access');
+    Route::get('/users/{user}/app-access/{clusterId}', [AdminUserController::class, 'getAppAccess'])->name('users.app-access');
 
     // ── API Providers CRUD ──
     Route::get('/api-providers', [AdminWebController::class, 'apiProviders'])->name('api-providers');
@@ -115,6 +119,21 @@ Route::middleware(['web', 'auth', 'cluster.aware'])->prefix('admin')->name('admi
     Route::delete('/permissions/roles/{role}', [AdminPermissionController::class, 'destroyRole'])->name('permissions.roles.destroy');
     Route::get('/permissions/roles/{role}/permissions', [AdminPermissionController::class, 'getRolePermissions'])->name('permissions.roles.permissions');
     Route::put('/permissions/roles/{role}/sync-permissions', [AdminPermissionController::class, 'toggleRolePermissions'])->name('permissions.roles.sync-permissions');
+
+    // ── Journeys ──
+    Route::get('/journeys', [AdminWebController::class, 'journeys'])->name('journeys');
+    Route::post('/journeys', [AdminJourneyController::class, 'store'])->name('journeys.store');
+    Route::put('/journeys/{journeyCode}', [AdminJourneyController::class, 'update'])->name('journeys.update');
+    Route::patch('/journeys/{journeyCode}/toggle', [AdminJourneyController::class, 'toggleStatus'])->name('journeys.toggle');
+    Route::delete('/journeys/{journeyCode}', [AdminJourneyController::class, 'destroy'])->name('journeys.destroy');
+
+    // ── Merchants ──
+    Route::get('/merchants', [AdminWebController::class, 'merchants'])->name('merchants');
+    Route::post('/merchants', [AdminMerchantController::class, 'store'])->name('merchants.store');
+    Route::put('/merchants/{merchantCode}', [AdminMerchantController::class, 'update'])->name('merchants.update');
+    Route::patch('/merchants/{merchantCode}/toggle', [AdminMerchantController::class, 'toggleStatus'])->name('merchants.toggle');
+    Route::delete('/merchants/{merchantCode}', [AdminMerchantController::class, 'destroy'])->name('merchants.destroy');
+    Route::get('/merchants/stats', [AdminMerchantController::class, 'stats'])->name('merchants.stats');
 
     // ── Reference ──
     Route::get('/api-reference', [AdminWebController::class, 'apiReference'])->name('api-reference');

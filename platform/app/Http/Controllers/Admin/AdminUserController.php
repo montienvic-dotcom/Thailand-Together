@@ -160,4 +160,57 @@ class AdminUserController extends Controller
             'user' => $user->load('groups', 'roles'),
         ]);
     }
+
+    /**
+     * Sync user's app access for a specific cluster.
+     * Expects: { cluster_id, app_access: [{app_id, has_access}] }
+     */
+    public function syncAppAccess(Request $request, User $user): JsonResponse
+    {
+        $data = $request->validate([
+            'cluster_id' => 'required|exists:clusters,id',
+            'app_access' => 'required|array',
+            'app_access.*.app_id' => 'required|exists:applications,id',
+            'app_access.*.has_access' => 'required|boolean',
+        ]);
+
+        DB::transaction(function () use ($user, $data) {
+            // Remove existing access for this cluster
+            DB::table('user_app_access')
+                ->where('user_id', $user->id)
+                ->where('cluster_id', $data['cluster_id'])
+                ->delete();
+
+            // Insert new access records
+            foreach ($data['app_access'] as $access) {
+                DB::table('user_app_access')->insert([
+                    'user_id' => $user->id,
+                    'cluster_id' => $data['cluster_id'],
+                    'application_id' => $access['app_id'],
+                    'has_access' => $access['has_access'],
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+        });
+
+        return response()->json([
+            'message' => 'App access updated for cluster.',
+        ]);
+    }
+
+    /**
+     * Get user's app access map (JSON).
+     */
+    public function getAppAccess(User $user, int $clusterId): JsonResponse
+    {
+        $access = DB::table('user_app_access')
+            ->where('user_id', $user->id)
+            ->where('cluster_id', $clusterId)
+            ->get(['application_id', 'has_access'])
+            ->keyBy('application_id')
+            ->map(fn($row) => (bool) $row->has_access);
+
+        return response()->json(['access' => $access]);
+    }
 }

@@ -1,0 +1,71 @@
+name: Load Test (Staging)
+
+on:
+  schedule:
+    - cron: '0 2 * * 1'  # Every Monday 2 AM UTC
+  workflow_dispatch:
+    inputs:
+      scenario:
+        description: 'Test scenario (tourist, stress, database)'
+        required: true
+        default: 'tourist'
+        type: choice
+        options:
+          - tourist
+          - stress
+          - database
+      vus:
+        description: 'Virtual users (override scenario default)'
+        required: false
+        default: '100'
+      duration:
+        description: 'Duration (e.g. 5m, 10m)'
+        required: false
+        default: '5m'
+
+jobs:
+  load-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install k6
+        run: |
+          sudo gpg -k
+          sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+          echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+          sudo apt-get update
+          sudo apt-get install k6
+
+      - name: Run load test
+        env:
+          BASE_URL: ${{ secrets.STAGING_URL || 'http://localhost:8000' }}
+        run: |
+          cd loadtests/k6
+          SCENARIO=${{ github.event.inputs.scenario || 'tourist' }}
+          VUS=${{ github.event.inputs.vus || '100' }}
+          DURATION=${{ github.event.inputs.duration || '5m' }}
+
+          case $SCENARIO in
+            tourist)  FILE="scenarios/tourist-journey.js" ;;
+            stress)   FILE="scenarios/api-integration-stress.js" ;;
+            database) FILE="scenarios/database-stress.js" ;;
+          esac
+
+          k6 run \
+            -e BASE_URL=$BASE_URL \
+            --vus $VUS \
+            --duration $DURATION \
+            --out json=../../loadtests/reports/result.json \
+            --summary-export=../../loadtests/reports/summary.json \
+            $FILE
+
+      - name: Upload load test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: load-test-report-${{ github.event.inputs.scenario || 'tourist' }}
+          path: loadtests/reports/
+          retention-days: 30

@@ -81,6 +81,48 @@
             </form>
         </x-ui.card>
 
+        {{-- App Access Matrix --}}
+        <x-ui.card title="App Access per Cluster" class="mt-4">
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Select Cluster</label>
+                    <select x-model="selectedCluster" @change="loadAppAccess()" class="w-full sm:w-64 rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm">
+                        <option value="">Choose a cluster...</option>
+                        @foreach($clusters as $cluster)
+                            <option value="{{ $cluster->id }}">{{ $cluster->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <template x-if="selectedCluster && clusterApps.length > 0">
+                    <div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                            <template x-for="app in clusterApps" :key="app.id">
+                                <label class="inline-flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg border cursor-pointer hover:bg-gray-100 transition-colors">
+                                    <input type="checkbox" :value="app.id" :checked="appAccess[app.id] === true"
+                                        @change="appAccess[app.id] = $event.target.checked"
+                                        class="rounded border-gray-300 text-orange-500 focus:ring-orange-500" />
+                                    <div class="flex items-center gap-1.5">
+                                        <div class="w-5 h-5 rounded flex items-center justify-center flex-shrink-0" :style="'background-color: ' + (app.color || '#6C757D') + '20'">
+                                            <span class="text-[10px]" :style="'color: ' + (app.color || '#6C757D')">&#9679;</span>
+                                        </div>
+                                        <span class="text-sm text-gray-700" x-text="app.name"></span>
+                                    </div>
+                                </label>
+                            </template>
+                        </div>
+                        <div class="mt-4 flex justify-end">
+                            <x-ui.button variant="primary" size="sm" @click="saveAppAccess()" x-bind:disabled="loading">Save App Access</x-ui.button>
+                        </div>
+                    </div>
+                </template>
+
+                <template x-if="selectedCluster && clusterApps.length === 0">
+                    <p class="text-sm text-gray-400">No applications assigned to this cluster.</p>
+                </template>
+            </div>
+        </x-ui.card>
+
         {{-- Edit User Modal --}}
         <x-ui.modal name="edit-user" maxWidth="lg">
             <form @submit.prevent="saveUser()">
@@ -129,6 +171,10 @@
         function userDetail() {
             return {
                 loading: false,
+                selectedCluster: '',
+                clusterApps: [],
+                appAccess: {},
+                clustersData: @json($clusters->mapWithKeys(fn($c) => [$c->id => $c->applications->map(fn($a) => ['id' => $a->id, 'name' => $a->name, 'color' => $a->color])])),
                 userGroups: @json($user->groups->pluck('id')->map(fn($id) => (string) $id)),
                 selectedRole: @json((string) ($user->roles->first()?->id ?? '')),
                 editForm: {
@@ -188,6 +234,37 @@
                         const data = await res.json();
                         this.showToast(data.message);
                     } catch (e) { this.showToast('Failed to update role.', 'error'); }
+                    this.loading = false;
+                },
+
+                async loadAppAccess() {
+                    if (!this.selectedCluster) { this.clusterApps = []; return; }
+                    this.clusterApps = this.clustersData[this.selectedCluster] || [];
+                    this.appAccess = {};
+                    try {
+                        const res = await fetch('/admin/users/{{ $user->id }}/app-access/' + this.selectedCluster, {
+                            headers: { 'Accept': 'application/json' },
+                        });
+                        const data = await res.json();
+                        this.appAccess = data.access || {};
+                    } catch (e) { /* defaults to empty */ }
+                },
+
+                async saveAppAccess() {
+                    this.loading = true;
+                    const appAccessList = this.clusterApps.map(app => ({
+                        app_id: app.id,
+                        has_access: !!this.appAccess[app.id],
+                    }));
+                    try {
+                        const res = await fetch('{{ route("admin.users.sync-app-access", $user->id) }}', {
+                            method: 'PUT',
+                            headers: { 'X-CSRF-TOKEN': this.csrfToken(), 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                            body: JSON.stringify({ cluster_id: Number(this.selectedCluster), app_access: appAccessList }),
+                        });
+                        const data = await res.json();
+                        this.showToast(data.message);
+                    } catch (e) { this.showToast('Failed to update app access.', 'error'); }
                     this.loading = false;
                 },
 

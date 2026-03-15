@@ -1,12 +1,17 @@
 <?php
 
+use App\Http\Controllers\Api\AdapterController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ClusterController;
 use App\Http\Controllers\Api\IntegrationController;
 use App\Http\Controllers\Api\Merchant\JourneyController;
 use App\Http\Controllers\Api\Merchant\MerchantController;
+use App\Http\Controllers\Api\Mobile\BookingController;
+use App\Http\Controllers\Api\Mobile\DealController;
+use App\Http\Controllers\Api\Mobile\DiscoverController;
 use App\Http\Controllers\Api\Mobile\NotificationController;
 use App\Http\Controllers\Api\Mobile\ProfileController;
+use App\Http\Controllers\Api\RewardController;
 use App\Http\Controllers\SuperApp\MenuController;
 use Illuminate\Support\Facades\Route;
 
@@ -75,6 +80,28 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead']);
         Route::delete('/notifications/{id}', [NotificationController::class, 'destroy']);
         Route::post('/device-token', [NotificationController::class, 'registerDeviceToken']);
+
+        // ── Discover / Browse (Tourist Experience) ──
+        Route::prefix('discover')->group(function () {
+            Route::get('/home', [DiscoverController::class, 'home']);
+            Route::get('/journeys', [DiscoverController::class, 'journeys']);
+            Route::get('/journeys/{code}', [DiscoverController::class, 'journeyDetail']);
+            Route::get('/merchants', [DiscoverController::class, 'merchants']);
+            Route::get('/merchants/nearby', [DiscoverController::class, 'nearbyMerchants']);
+            Route::get('/merchants/{id}', [DiscoverController::class, 'merchantDetail']);
+            Route::get('/recommendations', [DiscoverController::class, 'recommendations']);
+        });
+
+        // ── Bookings ──
+        Route::get('/bookings', [BookingController::class, 'index']);
+        Route::post('/bookings', [BookingController::class, 'store']);
+        Route::get('/bookings/{id}', [BookingController::class, 'show']);
+        Route::put('/bookings/{id}/cancel', [BookingController::class, 'cancel']);
+
+        // ── Deals & Promotions ──
+        Route::get('/deals', [DealController::class, 'index']);
+        Route::get('/deals/{id}', [DealController::class, 'show']);
+        Route::post('/deals/{id}/redeem', [DealController::class, 'redeem']);
     });
 
     // ── Third-Party Integration Routes ──
@@ -115,6 +142,22 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Health check
         Route::get('/health', [IntegrationController::class, 'health']);
+    });
+
+    // ── Rewards & Cross-Cluster ──
+    Route::prefix('rewards')->group(function () {
+        Route::get('/balance', [RewardController::class, 'balance']);
+        Route::post('/earn', [RewardController::class, 'earn']);
+        Route::post('/redeem', [RewardController::class, 'redeem']);
+        Route::post('/transfer', [RewardController::class, 'transfer']);
+        Route::get('/exchange-rates', [RewardController::class, 'exchangeRates']);
+    });
+
+    // ── External App Adapters ──
+    Route::prefix('adapters')->group(function () {
+        Route::get('/', [AdapterController::class, 'index']);
+        Route::get('/{name}/health', [AdapterController::class, 'health']);
+        Route::post('/{name}/execute', [AdapterController::class, 'execute']);
     });
 
     // ── Cluster-Scoped Routes (auth + cluster context) ──

@@ -1,0 +1,41 @@
+{
+    "sla": {
+        "api_response_time_p50_ms": 200,
+        "api_response_time_p95_ms": 500,
+        "api_response_time_p99_ms": 1000,
+        "error_rate_percent": 0.1,
+        "throughput_rps": 500,
+        "concurrent_users": 5000,
+        "db_query_p95_ms": 100,
+        "cache_hit_rate_percent": 90,
+        "uptime_percent": 99.9
+    },
+    "critical": {
+        "api_response_time_p50_ms": 500,
+        "api_response_time_p95_ms": 1500,
+        "api_response_time_p99_ms": 3000,
+        "error_rate_percent": 1.0,
+        "throughput_rps": 200,
+        "concurrent_users": 1000,
+        "db_query_p95_ms": 500,
+        "cache_hit_rate_percent": 75,
+        "uptime_percent": 99.5
+    },
+    "scenarios": {
+        "tourist_journey": {
+            "vus_target": 5000,
+            "duration": "22m",
+            "description": "Peak season tourist day simulation"
+        },
+        "api_integration_stress": {
+            "rps_target": 100,
+            "duration": "5m",
+            "description": "Third-party API resilience test"
+        },
+        "database_stress": {
+            "vus_target": 1000,
+            "duration": "8m",
+            "description": "Database bottleneck detection"
+        }
+    }
+}
