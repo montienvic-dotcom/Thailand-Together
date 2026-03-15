@@ -39,12 +39,23 @@
                     </div>
                 </div>
                 <div class="flex items-center gap-2">
+                    <x-ui.button variant="outline" size="sm" @click="testConnection()" x-bind:disabled="testing">
+                        <template x-if="testing"><x-icon name="arrow-path" class="w-4 h-4 animate-spin mr-1" /></template>
+                        <template x-if="!testing"><x-icon name="signal" class="w-4 h-4 mr-1" /></template>
+                        <span x-text="testing ? 'Testing...' : 'Test Connection'"></span>
+                    </x-ui.button>
                     <x-ui.button variant="outline" size="sm" @click="$dispatch('open-modal-edit-provider')">
                         <x-icon name="pencil" class="w-4 h-4 mr-1" /> Edit
                     </x-ui.button>
                     <x-ui.button variant="outline" size="sm" @click="toggleActive()">
                         <span x-text="provActive ? 'Deactivate' : 'Activate'"></span>
                     </x-ui.button>
+                </div>
+
+                {{-- Health status indicator --}}
+                <div x-show="healthStatus !== null" x-transition class="mt-3 flex items-center gap-2">
+                    <div class="w-2.5 h-2.5 rounded-full" :class="healthStatus === 'ok' ? 'bg-green-400' : 'bg-red-400'"></div>
+                    <span class="text-xs font-medium" :class="healthStatus === 'ok' ? 'text-green-600' : 'text-red-600'" x-text="healthMessage"></span>
                 </div>
             </div>
         </div>
@@ -205,6 +216,9 @@
         function providerDetail() {
             return {
                 loading: false,
+                testing: false,
+                healthStatus: null,
+                healthMessage: '',
                 provActive: {{ $provider->is_active ? 'true' : 'false' }},
                 editForm: {
                     name: @json($provider->name),
@@ -281,6 +295,25 @@
                         else { this.showToast(data.message); this.$dispatch('close-modal-add-credential'); setTimeout(() => location.reload(), 800); }
                     } catch (e) { this.showToast('Failed to save credentials.', 'error'); }
                     this.loading = false;
+                },
+
+                async testConnection() {
+                    this.testing = true;
+                    this.healthStatus = null;
+                    try {
+                        const res = await fetch('{{ route("admin.api-providers.health", $provider->id) }}', {
+                            headers: { 'Accept': 'application/json' },
+                        });
+                        const data = await res.json();
+                        this.healthStatus = data.status;
+                        this.healthMessage = data.message;
+                        this.showToast(data.message, data.status === 'ok' ? 'success' : 'error');
+                    } catch (e) {
+                        this.healthStatus = 'error';
+                        this.healthMessage = 'Connection test failed.';
+                        this.showToast('Connection test failed.', 'error');
+                    }
+                    this.testing = false;
                 },
 
                 async deleteCred(id) {

@@ -145,12 +145,215 @@ class IntegrationController extends Controller
         return response()->json(['data' => $result]);
     }
 
+    // ── Cloud Point / Rewards ──
+
+    /**
+     * POST /api/integrations/points/earn
+     */
+    public function pointsEarn(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'user_id' => 'required|string',
+            'points' => 'required|integer|min:1',
+            'reason' => 'required|string|max:500',
+        ]);
+
+        $adapter = $this->gateway->adapter('cloud-point');
+        $result = $adapter->earn($validated['user_id'], $validated['points'], $validated['reason']);
+
+        return response()->json(['data' => $result, 'message' => 'Points earned']);
+    }
+
+    /**
+     * POST /api/integrations/points/redeem
+     */
+    public function pointsRedeem(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'user_id' => 'required|string',
+            'points' => 'required|integer|min:1',
+            'reward_code' => 'required|string|max:100',
+        ]);
+
+        $adapter = $this->gateway->adapter('cloud-point');
+        $result = $adapter->redeem($validated['user_id'], $validated['points'], $validated['reward_code']);
+
+        return response()->json(['data' => $result, 'message' => 'Points redeemed']);
+    }
+
+    /**
+     * GET /api/integrations/points/balance/{userId}
+     */
+    public function pointsBalance(string $userId): JsonResponse
+    {
+        $adapter = $this->gateway->adapter('cloud-point');
+        $result = $adapter->getBalance($userId);
+
+        return response()->json(['data' => $result]);
+    }
+
+    /**
+     * POST /api/integrations/points/transfer
+     */
+    public function pointsTransfer(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'from_user_id' => 'required|string',
+            'to_user_id' => 'required|string',
+            'points' => 'required|integer|min:1',
+        ]);
+
+        $adapter = $this->gateway->adapter('cloud-point');
+        $result = $adapter->transfer($validated['from_user_id'], $validated['to_user_id'], $validated['points']);
+
+        return response()->json(['data' => $result, 'message' => 'Points transferred']);
+    }
+
+    // ── Translate (dedicated) ──
+
+    /**
+     * POST /api/integrations/translate
+     */
+    public function translate(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'text' => 'required|string|max:10000',
+            'target' => 'required|string|max:5',
+            'source' => 'sometimes|string|max:5',
+        ]);
+
+        $adapter = $this->gateway->adapter('translate');
+        $result = $adapter->translate($validated['text'], $validated['target'], $validated['source'] ?? null);
+
+        return response()->json(['data' => $result]);
+    }
+
+    /**
+     * POST /api/integrations/translate/batch
+     */
+    public function translateBatch(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'texts' => 'required|array|min:1|max:100',
+            'texts.*' => 'string|max:10000',
+            'target' => 'required|string|max:5',
+            'source' => 'sometimes|string|max:5',
+        ]);
+
+        $adapter = $this->gateway->adapter('translate');
+        $result = $adapter->translateBatch($validated['texts'], $validated['target'], $validated['source'] ?? null);
+
+        return response()->json(['data' => $result]);
+    }
+
+    /**
+     * POST /api/integrations/translate/detect
+     */
+    public function detectLanguage(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'text' => 'required|string|max:5000',
+        ]);
+
+        $adapter = $this->gateway->adapter('translate');
+        $result = $adapter->detectLanguage($validated['text']);
+
+        return response()->json(['data' => $result]);
+    }
+
+    // ── TTS (dedicated) ──
+
+    /**
+     * POST /api/integrations/tts/synthesize
+     */
+    public function ttsSynthesize(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'text' => 'required|string|max:5000',
+            'language' => 'sometimes|string|in:th,en,zh,ja,ko,ru',
+            'voice' => 'sometimes|string|max:50',
+            'format' => 'sometimes|string|in:mp3,wav,ogg',
+        ]);
+
+        $adapter = $this->gateway->adapter('tts');
+        $result = $adapter->synthesize(
+            $validated['text'],
+            $validated['language'] ?? 'th',
+            array_filter([
+                'voice' => $validated['voice'] ?? null,
+                'format' => $validated['format'] ?? null,
+            ])
+        );
+
+        return response()->json(['data' => $result]);
+    }
+
+    /**
+     * GET /api/integrations/tts/voices
+     */
+    public function ttsVoices(Request $request): JsonResponse
+    {
+        $adapter = $this->gateway->adapter('tts');
+        $result = $adapter->listVoices($request->query('language'));
+
+        return response()->json(['data' => $result]);
+    }
+
+    // ── HelpDesk ──
+
+    /**
+     * POST /api/integrations/helpdesk/tickets
+     */
+    public function createTicket(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'subject' => 'required|string|max:255',
+            'body' => 'required|string|max:5000',
+            'priority' => 'sometimes|string|in:low,medium,high,urgent',
+            'category' => 'sometimes|string|max:100',
+        ]);
+
+        $adapter = $this->gateway->adapter('helpdesk');
+        $result = $adapter->createTicket($validated);
+
+        return response()->json(['data' => $result, 'message' => 'Ticket created'], 201);
+    }
+
+    /**
+     * GET /api/integrations/helpdesk/tickets/{ticketId}
+     */
+    public function getTicket(string $ticketId): JsonResponse
+    {
+        $adapter = $this->gateway->adapter('helpdesk');
+        $result = $adapter->getTicket($ticketId);
+
+        return response()->json(['data' => $result]);
+    }
+
+    /**
+     * POST /api/integrations/helpdesk/tickets/{ticketId}/comment
+     */
+    public function addTicketComment(Request $request, string $ticketId): JsonResponse
+    {
+        $validated = $request->validate([
+            'body' => 'required|string|max:5000',
+            'is_public' => 'sometimes|boolean',
+        ]);
+
+        $adapter = $this->gateway->adapter('helpdesk');
+        $result = $adapter->addComment($ticketId, $validated['body'], $validated['is_public'] ?? true);
+
+        return response()->json(['data' => $result, 'message' => 'Comment added']);
+    }
+
+    // ── Health Check ──
+
     /**
      * GET /api/integrations/health
      */
     public function health(): JsonResponse
     {
-        $providers = ['payment', 'sms', 'ai-agent'];
+        $providers = ['payment', 'sms', 'ai-agent', 'cloud-point', 'translate', 'tts', 'helpdesk'];
         $status = [];
 
         foreach ($providers as $slug) {
