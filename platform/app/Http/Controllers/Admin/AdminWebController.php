@@ -90,8 +90,12 @@ class AdminWebController extends Controller
         $user = User::with('groups', 'roles')->findOrFail($user);
         $groups = Group::orderBy('sort_order')->get();
         $roles = Role::all();
+        $clusters = Cluster::active()
+            ->with(['applications' => fn($q) => $q->where('cluster_application.is_active', true)->orderBy('sort_order')])
+            ->orderBy('sort_order')
+            ->get();
 
-        return view('admin.users.show', compact('user', 'groups', 'roles'));
+        return view('admin.users.show', compact('user', 'groups', 'roles', 'clusters'));
     }
 
     // ── API Providers ──

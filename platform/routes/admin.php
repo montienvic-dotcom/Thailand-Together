@@ -68,6 +68,8 @@ Route::middleware(['web', 'auth', 'cluster.aware'])->prefix('admin')->name('admi
     Route::put('/users/{user}/role', [AdminUserController::class, 'updateRole'])->name('users.update-role');
     Route::delete('/users/{user}', [AdminUserController::class, 'destroy'])->name('users.destroy');
     Route::get('/users/{user}/json', [AdminUserController::class, 'show'])->name('users.json');
+    Route::put('/users/{user}/app-access', [AdminUserController::class, 'syncAppAccess'])->name('users.sync-app-access');
+    Route::get('/users/{user}/app-access/{clusterId}', [AdminUserController::class, 'getAppAccess'])->name('users.app-access');
 
     // ── API Providers CRUD ──
     Route::get('/api-providers', [AdminWebController::class, 'apiProviders'])->name('api-providers');
