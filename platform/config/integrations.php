@@ -20,7 +20,7 @@ return [
         'sms' => [
             'label' => 'SMS Service',
             'description' => 'SMS messaging and OTP services',
-            'adapter' => \App\Services\ApiGateway\Adapters\SmsAdapter::class,
+            'adapter' => \App\Services\ApiGateway\Adapters\SMSAdapter::class,
         ],
         'ai_agent' => [
             'label' => 'AI Agent',

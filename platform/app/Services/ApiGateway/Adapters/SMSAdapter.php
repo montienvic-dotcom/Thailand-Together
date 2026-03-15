@@ -6,7 +6,7 @@ namespace App\Services\ApiGateway\Adapters;
  * SMS service adapter.
  * Supports Twilio, local SMS providers per country.
  */
-class SmsAdapter extends BaseAdapter
+class SMSAdapter extends BaseAdapter
 {
     public function providerName(): string
     {
