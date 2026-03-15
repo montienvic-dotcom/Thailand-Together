@@ -76,6 +76,7 @@ Route::middleware(['web', 'auth', 'cluster.aware'])->prefix('admin')->name('admi
     Route::put('/api-providers/{provider}', [AdminApiProviderController::class, 'update'])->name('api-providers.update');
     Route::patch('/api-providers/{provider}/toggle', [AdminApiProviderController::class, 'toggleActive'])->name('api-providers.toggle');
     Route::delete('/api-providers/{provider}', [AdminApiProviderController::class, 'destroy'])->name('api-providers.destroy');
+    Route::get('/api-providers/{provider}/health', [AdminApiProviderController::class, 'healthCheck'])->name('api-providers.health');
 
     // ── API Credentials ──
     Route::post('/api-providers/{provider}/credentials', [AdminApiProviderController::class, 'storeCredential'])->name('api-credentials.store');

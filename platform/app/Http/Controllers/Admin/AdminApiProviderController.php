@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Integration\ApiCredential;
 use App\Models\Integration\ApiProvider;
+use App\Services\ApiGateway\ApiGatewayService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -140,5 +141,28 @@ class AdminApiProviderController extends Controller
         $credential->delete();
 
         return response()->json(['message' => 'Credentials deleted.']);
+    }
+
+    /**
+     * Test connection / health check for a provider.
+     */
+    public function healthCheck(ApiProvider $provider, ApiGatewayService $gateway): JsonResponse
+    {
+        try {
+            $adapter = $gateway->adapter($provider->slug);
+            $healthy = $adapter->healthCheck();
+
+            return response()->json([
+                'status' => $healthy ? 'ok' : 'error',
+                'message' => $healthy ? 'Connection successful.' : 'Health check failed.',
+                'provider' => $provider->name,
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Connection failed: ' . $e->getMessage(),
+                'provider' => $provider->name,
+            ], 422);
+        }
     }
 }
