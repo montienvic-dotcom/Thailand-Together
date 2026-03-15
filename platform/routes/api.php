@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\Merchant\JourneyController;
 use App\Http\Controllers\Api\Merchant\MerchantController;
 use App\Http\Controllers\Api\Mobile\NotificationController;
 use App\Http\Controllers\Api\Mobile\ProfileController;
+use App\Http\Controllers\Api\RewardController;
 use App\Http\Controllers\SuperApp\MenuController;
 use Illuminate\Support\Facades\Route;
 
@@ -115,6 +116,15 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Health check
         Route::get('/health', [IntegrationController::class, 'health']);
+    });
+
+    // ── Rewards & Cross-Cluster ──
+    Route::prefix('rewards')->group(function () {
+        Route::get('/balance', [RewardController::class, 'balance']);
+        Route::post('/earn', [RewardController::class, 'earn']);
+        Route::post('/redeem', [RewardController::class, 'redeem']);
+        Route::post('/transfer', [RewardController::class, 'transfer']);
+        Route::get('/exchange-rates', [RewardController::class, 'exchangeRates']);
     });
 
     // ── Cluster-Scoped Routes (auth + cluster context) ──
