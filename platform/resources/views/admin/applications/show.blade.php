@@ -60,6 +60,9 @@
                         <x-icon name="pencil" class="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1" />
                         <span class="text-xs sm:text-sm">Edit</span>
                     </x-ui.button>
+                    <x-ui.button variant="danger" size="sm" @click="deleteApp()">
+                        <x-icon name="trash" class="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                    </x-ui.button>
                 </div>
             </div>
         </div>
@@ -84,6 +87,9 @@
         <div class="mt-4 sm:mt-6">
             <div class="flex items-center justify-between mb-3 sm:mb-4">
                 <h3 class="text-sm sm:text-base lg:text-lg font-semibold text-gray-900">Modules ({{ $app->modules->count() }})</h3>
+                <x-ui.button variant="primary" size="sm" @click="$dispatch('open-modal-create-module')">
+                    <x-icon name="plus" class="w-4 h-4 mr-1" /> Add Module
+                </x-ui.button>
             </div>
 
             @if($app->modules->isNotEmpty())
