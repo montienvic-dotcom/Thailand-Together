@@ -93,6 +93,26 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/ai/translate', [IntegrationController::class, 'aiTranslate']);
         Route::post('/ai/tts', [IntegrationController::class, 'aiTextToSpeech']);
 
+        // Cloud Point / Rewards
+        Route::post('/points/earn', [IntegrationController::class, 'pointsEarn']);
+        Route::post('/points/redeem', [IntegrationController::class, 'pointsRedeem']);
+        Route::get('/points/balance/{userId}', [IntegrationController::class, 'pointsBalance']);
+        Route::post('/points/transfer', [IntegrationController::class, 'pointsTransfer']);
+
+        // Translation (dedicated)
+        Route::post('/translate', [IntegrationController::class, 'translate']);
+        Route::post('/translate/batch', [IntegrationController::class, 'translateBatch']);
+        Route::post('/translate/detect', [IntegrationController::class, 'detectLanguage']);
+
+        // TTS (dedicated)
+        Route::post('/tts/synthesize', [IntegrationController::class, 'ttsSynthesize']);
+        Route::get('/tts/voices', [IntegrationController::class, 'ttsVoices']);
+
+        // HelpDesk
+        Route::post('/helpdesk/tickets', [IntegrationController::class, 'createTicket']);
+        Route::get('/helpdesk/tickets/{ticketId}', [IntegrationController::class, 'getTicket']);
+        Route::post('/helpdesk/tickets/{ticketId}/comment', [IntegrationController::class, 'addTicketComment']);
+
         // Health check
         Route::get('/health', [IntegrationController::class, 'health']);
     });
