@@ -13,6 +13,7 @@ use App\Models\Integration\ApiProvider;
 use App\Services\Cluster\ClusterManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class AdminWebController extends Controller
 {
@@ -169,6 +170,34 @@ class AdminWebController extends Controller
         $roles = Role::withCount('users')->get();
         $permissions = \App\Models\Auth\Permission::orderBy('category')->orderBy('name')->get();
         return view('admin.permissions.roles', compact('roles', 'permissions'));
+    }
+
+    // ── Journeys ──
+
+    public function journeys()
+    {
+        $journeys = DB::table('journey')
+            ->leftJoin('clusters', 'journey.cluster_id', '=', 'clusters.id')
+            ->select('journey.*', 'clusters.name as cluster_name')
+            ->orderBy('journey.journey_code')
+            ->paginate(20);
+
+        return view('admin.journeys.index', compact('journeys'));
+    }
+
+    // ── Merchants ──
+
+    public function merchants()
+    {
+        $merchants = DB::table('merchant')
+            ->leftJoin('clusters', 'merchant.cluster_id', '=', 'clusters.id')
+            ->select('merchant.*', 'clusters.name as cluster_name')
+            ->orderBy('merchant.merchant_code')
+            ->paginate(20);
+
+        $clusters = Cluster::active()->orderBy('sort_order')->get();
+
+        return view('admin.merchants.index', compact('merchants', 'clusters'));
     }
 
     // ── Reference ──
