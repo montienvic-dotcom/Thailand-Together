@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AdminApiProviderController;
 use App\Http\Controllers\Admin\AdminApplicationController;
+use App\Http\Controllers\Admin\AdminClusterController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\AdminWebController;
@@ -79,6 +80,18 @@ Route::middleware(['web', 'auth', 'cluster.aware'])->prefix('admin')->name('admi
     Route::post('/api-providers/{provider}/credentials', [AdminApiProviderController::class, 'storeCredential'])->name('api-credentials.store');
     Route::put('/api-credentials/{credential}', [AdminApiProviderController::class, 'updateCredential'])->name('api-credentials.update');
     Route::delete('/api-credentials/{credential}', [AdminApiProviderController::class, 'destroyCredential'])->name('api-credentials.destroy');
+
+    // ── Clusters & Countries ──
+    Route::get('/clusters', [AdminWebController::class, 'clusters'])->name('clusters');
+    Route::get('/clusters/{cluster}', [AdminWebController::class, 'clusterDetail'])->name('clusters.show');
+    Route::post('/clusters', [AdminClusterController::class, 'store'])->name('clusters.store');
+    Route::put('/clusters/{cluster}', [AdminClusterController::class, 'update'])->name('clusters.update');
+    Route::patch('/clusters/{cluster}/toggle', [AdminClusterController::class, 'toggleActive'])->name('clusters.toggle');
+    Route::delete('/clusters/{cluster}', [AdminClusterController::class, 'destroy'])->name('clusters.destroy');
+
+    Route::post('/countries', [AdminClusterController::class, 'storeCountry'])->name('countries.store');
+    Route::put('/countries/{country}', [AdminClusterController::class, 'updateCountry'])->name('countries.update');
+    Route::patch('/countries/{country}/toggle', [AdminClusterController::class, 'toggleCountry'])->name('countries.toggle');
 
     // ── Permissions ──
     Route::get('/permissions', [AdminWebController::class, 'permissions'])->name('permissions');

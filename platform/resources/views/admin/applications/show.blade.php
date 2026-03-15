@@ -160,6 +160,52 @@
             @endif
         </div>
 
+        {{-- Create Module Modal --}}
+        <x-ui.modal name="create-module" maxWidth="lg">
+            <form @submit.prevent="createModule()">
+                <div class="px-6 py-4 border-b border-gray-100">
+                    <h3 class="text-lg font-semibold text-gray-900">Add Module</h3>
+                </div>
+                <div class="px-6 py-4 space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Name *</label>
+                        <input type="text" x-model="newModule.name" required class="w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Code</label>
+                        <input type="text" x-model="newModule.code" placeholder="AUTO_GENERATED" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm font-mono" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                        <textarea x-model="newModule.description" rows="2" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm"></textarea>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Icon</label>
+                            <input type="text" x-model="newModule.icon" placeholder="Same as app icon" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Route Prefix</label>
+                            <input type="text" x-model="newModule.route_prefix" placeholder="/module-path" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm" />
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <input type="checkbox" x-model="newModule.is_premium" class="rounded border-gray-300 text-orange-500 focus:ring-orange-500" />
+                        <label class="text-sm text-gray-700">Premium module</label>
+                    </div>
+                </div>
+                <div class="px-6 py-3 bg-gray-50 border-t border-gray-100 flex justify-end gap-2">
+                    <x-ui.button variant="outline" size="sm" @click="$dispatch('close-modal-create-module')" type="button">Cancel</x-ui.button>
+                    <x-ui.button variant="primary" size="sm" type="submit" x-bind:disabled="loading">
+                        <template x-if="loading">
+                            <x-icon name="arrow-path" class="w-4 h-4 animate-spin mr-1" />
+                        </template>
+                        Create Module
+                    </x-ui.button>
+                </div>
+            </form>
+        </x-ui.modal>
+
         {{-- Edit App Modal --}}
         <x-ui.modal name="edit-app" maxWidth="xl">
             <form @submit.prevent="saveApp()">
@@ -296,6 +342,7 @@
                     base_url: @json($app->base_url ?? ''),
                     show_in_menu: {{ $app->show_in_menu ? 'true' : 'false' }},
                 },
+                newModule: { name: '', code: '', description: '', icon: '', route_prefix: '', is_premium: false },
                 editModule: { id: null, name: '', description: '', icon: '', route_prefix: '' },
                 toast: { show: false, message: '', type: 'success' },
 
@@ -306,6 +353,49 @@
                 showToast(message, type = 'success') {
                     this.toast = { show: true, message, type };
                     setTimeout(() => this.toast.show = false, 3000);
+                },
+
+                async deleteApp() {
+                    if (!confirm('Are you sure you want to delete this application and all its modules?')) return;
+                    this.loading = true;
+                    try {
+                        const res = await fetch('{{ route('admin.applications.destroy', $app->id) }}', {
+                            method: 'DELETE',
+                            headers: { 'X-CSRF-TOKEN': this.csrfToken(), 'Accept': 'application/json' },
+                        });
+                        const data = await res.json();
+                        this.showToast(data.message);
+                        setTimeout(() => window.location.href = '{{ route('admin.applications') }}', 800);
+                    } catch (e) {
+                        this.showToast('Failed to delete application.', 'error');
+                    }
+                    this.loading = false;
+                },
+
+                async createModule() {
+                    this.loading = true;
+                    try {
+                        const res = await fetch('{{ route('admin.modules.store', $app->id) }}', {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': this.csrfToken(),
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                            },
+                            body: JSON.stringify(this.newModule),
+                        });
+                        const data = await res.json();
+                        if (!res.ok) {
+                            this.showToast(Object.values(data.errors || {}).flat().join(', '), 'error');
+                        } else {
+                            this.showToast(data.message);
+                            this.$dispatch('close-modal-create-module');
+                            setTimeout(() => location.reload(), 800);
+                        }
+                    } catch (e) {
+                        this.showToast('Failed to create module.', 'error');
+                    }
+                    this.loading = false;
                 },
 
                 async toggleApp() {

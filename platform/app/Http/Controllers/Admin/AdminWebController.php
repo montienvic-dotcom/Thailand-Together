@@ -118,6 +118,27 @@ class AdminWebController extends Controller
         return view('admin.api-providers.show', compact('provider', 'countries', 'clusters'));
     }
 
+    // ── Clusters & Countries ──
+
+    public function clusters()
+    {
+        $countries = Country::with(['clusters' => fn($q) => $q->withCount('applications')->orderBy('sort_order')])
+            ->orderBy('sort_order')
+            ->get();
+
+        return view('admin.clusters.index', compact('countries'));
+    }
+
+    public function clusterDetail(int $cluster)
+    {
+        $cluster = Cluster::with([
+            'country',
+            'applications' => fn($q) => $q->orderBy('sort_order'),
+        ])->findOrFail($cluster);
+
+        return view('admin.clusters.show', compact('cluster'));
+    }
+
     // ── Permissions ──
 
     public function permissions()
