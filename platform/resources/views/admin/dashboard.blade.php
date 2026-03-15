@@ -25,9 +25,19 @@
                     <span>Permission Management</span>
                     <x-icon name="chevron-right" class="w-4 h-4 text-gray-300 ml-auto" />
                 </a>
-                <a href="{{ route('admin.permissions.users') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50 text-sm text-gray-700 transition-colors">
+                <a href="{{ route('admin.users') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50 text-sm text-gray-700 transition-colors">
                     <x-icon name="users" class="w-5 h-5 text-gray-400" />
                     <span>User Management</span>
+                    <x-icon name="chevron-right" class="w-4 h-4 text-gray-300 ml-auto" />
+                </a>
+                <a href="{{ route('admin.clusters') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50 text-sm text-gray-700 transition-colors">
+                    <x-icon name="map" class="w-5 h-5 text-gray-400" />
+                    <span>Clusters & Countries</span>
+                    <x-icon name="chevron-right" class="w-4 h-4 text-gray-300 ml-auto" />
+                </a>
+                <a href="{{ route('admin.api-providers') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50 text-sm text-gray-700 transition-colors">
+                    <x-icon name="cloud" class="w-5 h-5 text-gray-400" />
+                    <span>API Providers</span>
                     <x-icon name="chevron-right" class="w-4 h-4 text-gray-300 ml-auto" />
                 </a>
             </div>

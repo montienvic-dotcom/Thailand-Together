@@ -7,9 +7,40 @@ use App\Models\App\Application;
 use App\Models\App\Module;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class AdminApplicationController extends Controller
 {
+    /**
+     * Create a new application.
+     */
+    public function store(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'code' => 'nullable|string|max:50|unique:applications,code',
+            'description' => 'nullable|string|max:1000',
+            'icon' => 'sometimes|string|max:100',
+            'color' => 'sometimes|string|max:7',
+            'type' => 'required|in:web,mobile,hybrid,api',
+            'source' => 'required|in:internal,external,third-party',
+            'base_url' => 'nullable|url|max:500',
+            'show_in_menu' => 'sometimes|boolean',
+        ]);
+
+        $data['slug'] = Str::slug($data['name']);
+        $data['code'] = $data['code'] ?? Str::upper(Str::slug($data['name'], '_'));
+        $data['is_active'] = true;
+        $data['sort_order'] = (Application::max('sort_order') ?? 0) + 1;
+
+        $app = Application::create($data);
+
+        return response()->json([
+            'message' => 'Application created successfully.',
+            'application' => $app,
+        ], 201);
+    }
+
     /**
      * Update application details.
      */
@@ -45,6 +76,43 @@ class AdminApplicationController extends Controller
             'message' => $application->is_active ? 'Application activated.' : 'Application deactivated.',
             'is_active' => $application->is_active,
         ]);
+    }
+
+    /**
+     * Soft delete an application.
+     */
+    public function destroy(Application $application): JsonResponse
+    {
+        $application->delete();
+
+        return response()->json(['message' => 'Application deleted successfully.']);
+    }
+
+    /**
+     * Create a new module within an application.
+     */
+    public function storeModule(Request $request, Application $application): JsonResponse
+    {
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'code' => 'nullable|string|max:50',
+            'description' => 'nullable|string|max:1000',
+            'icon' => 'nullable|string|max:100',
+            'route_prefix' => 'nullable|string|max:255',
+            'is_premium' => 'sometimes|boolean',
+        ]);
+
+        $data['code'] = $data['code'] ?? Str::upper(Str::slug($data['name'], '_'));
+        $data['application_id'] = $application->id;
+        $data['is_active'] = true;
+        $data['sort_order'] = ($application->modules()->max('sort_order') ?? 0) + 1;
+
+        $module = Module::create($data);
+
+        return response()->json([
+            'message' => 'Module created successfully.',
+            'module' => $module,
+        ], 201);
     }
 
     /**
@@ -93,6 +161,16 @@ class AdminApplicationController extends Controller
             'message' => 'Module updated successfully.',
             'module' => $module->fresh(),
         ]);
+    }
+
+    /**
+     * Delete a module.
+     */
+    public function destroyModule(Module $module): JsonResponse
+    {
+        $module->delete();
+
+        return response()->json(['message' => 'Module deleted successfully.']);
     }
 
     /**

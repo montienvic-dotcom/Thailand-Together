@@ -36,10 +36,11 @@ class AdminWebController extends Controller
         return view('admin.dashboard', $data);
     }
 
+    // ── Applications ──
+
     public function applications()
     {
-        $apps = Application::active()
-            ->withCount('activeModules')
+        $apps = Application::withCount('activeModules')
             ->orderBy('sort_order')
             ->get();
 
@@ -55,6 +56,90 @@ class AdminWebController extends Controller
 
         return view('admin.applications.show', compact('app'));
     }
+
+    // ── Users ──
+
+    public function users(Request $request)
+    {
+        $query = User::query();
+
+        if ($search = $request->query('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        if ($status = $request->query('status')) {
+            $query->where('status', $status);
+        }
+
+        $users = $query->with('groups', 'roles')
+            ->orderBy('created_at', 'desc')
+            ->paginate(20)
+            ->withQueryString();
+
+        $groups = Group::orderBy('sort_order')->get();
+        $roles = Role::all();
+
+        return view('admin.users.index', compact('users', 'groups', 'roles'));
+    }
+
+    public function userDetail(int $user)
+    {
+        $user = User::with('groups', 'roles')->findOrFail($user);
+        $groups = Group::orderBy('sort_order')->get();
+        $roles = Role::all();
+
+        return view('admin.users.show', compact('user', 'groups', 'roles'));
+    }
+
+    // ── API Providers ──
+
+    public function apiProviders()
+    {
+        $providers = ApiProvider::withCount('credentials')
+            ->orderBy('category')
+            ->orderBy('name')
+            ->get();
+
+        return view('admin.api-providers.index', compact('providers'));
+    }
+
+    public function apiProviderDetail(int $provider)
+    {
+        $provider = ApiProvider::with([
+            'credentials' => fn($q) => $q->with('country', 'cluster'),
+        ])->findOrFail($provider);
+
+        $countries = Country::active()->get();
+        $clusters = Cluster::active()->get();
+
+        return view('admin.api-providers.show', compact('provider', 'countries', 'clusters'));
+    }
+
+    // ── Clusters & Countries ──
+
+    public function clusters()
+    {
+        $countries = Country::with(['clusters' => fn($q) => $q->withCount('applications')->orderBy('sort_order')])
+            ->orderBy('sort_order')
+            ->get();
+
+        return view('admin.clusters.index', compact('countries'));
+    }
+
+    public function clusterDetail(int $cluster)
+    {
+        $cluster = Cluster::with([
+            'country',
+            'applications' => fn($q) => $q->orderBy('sort_order'),
+        ])->findOrFail($cluster);
+
+        return view('admin.clusters.show', compact('cluster'));
+    }
+
+    // ── Permissions ──
 
     public function permissions()
     {
@@ -79,6 +164,8 @@ class AdminWebController extends Controller
         return view('admin.permissions.roles', compact('roles'));
     }
 
+    // ── Reference ──
+
     public function apiReference()
     {
         return view('admin.api-reference');
@@ -88,6 +175,8 @@ class AdminWebController extends Controller
     {
         return view('admin.roadmap');
     }
+
+    // ── Auth ──
 
     public function loginForm()
     {
