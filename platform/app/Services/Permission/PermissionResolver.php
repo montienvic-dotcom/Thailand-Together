@@ -60,6 +60,14 @@ class PermissionResolver
     }
 
     /**
+     * Check if a user can access a specific app in a cluster (without module check).
+     */
+    public function canAccessApp(User $user, int $clusterId, int $applicationId): bool
+    {
+        return $this->canAccess($user, $clusterId, $applicationId);
+    }
+
+    /**
      * Get full access map for a user in a cluster.
      * Returns: [app_id => [module_ids...], ...]
      */

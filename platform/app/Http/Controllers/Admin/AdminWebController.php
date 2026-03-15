@@ -136,7 +136,9 @@ class AdminWebController extends Controller
             'applications' => fn($q) => $q->orderBy('sort_order'),
         ])->findOrFail($cluster);
 
-        return view('admin.clusters.show', compact('cluster'));
+        $allApps = Application::where('is_active', true)->orderBy('sort_order')->get();
+
+        return view('admin.clusters.show', compact('cluster', 'allApps'));
     }
 
     // ── Permissions ──
@@ -161,7 +163,8 @@ class AdminWebController extends Controller
     public function permissionRoles()
     {
         $roles = Role::withCount('users')->get();
-        return view('admin.permissions.roles', compact('roles'));
+        $permissions = \App\Models\Auth\Permission::orderBy('category')->orderBy('name')->get();
+        return view('admin.permissions.roles', compact('roles', 'permissions'));
     }
 
     // ── Reference ──

@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AdminApiProviderController;
 use App\Http\Controllers\Admin\AdminApplicationController;
 use App\Http\Controllers\Admin\AdminClusterController;
 use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\AdminPermissionController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\AdminWebController;
 use App\Http\Controllers\Admin\PermissionController;
@@ -88,6 +89,8 @@ Route::middleware(['web', 'auth', 'cluster.aware'])->prefix('admin')->name('admi
     Route::put('/clusters/{cluster}', [AdminClusterController::class, 'update'])->name('clusters.update');
     Route::patch('/clusters/{cluster}/toggle', [AdminClusterController::class, 'toggleActive'])->name('clusters.toggle');
     Route::delete('/clusters/{cluster}', [AdminClusterController::class, 'destroy'])->name('clusters.destroy');
+    Route::put('/clusters/{cluster}/sync-apps', [AdminClusterController::class, 'syncApplications'])->name('clusters.sync-apps');
+    Route::patch('/clusters/{cluster}/apps/{application}/toggle', [AdminClusterController::class, 'toggleClusterApp'])->name('clusters.toggle-app');
 
     Route::post('/countries', [AdminClusterController::class, 'storeCountry'])->name('countries.store');
     Route::put('/countries/{country}', [AdminClusterController::class, 'updateCountry'])->name('countries.update');
@@ -98,6 +101,19 @@ Route::middleware(['web', 'auth', 'cluster.aware'])->prefix('admin')->name('admi
     Route::get('/permissions/users', [AdminWebController::class, 'permissionUsers'])->name('permissions.users');
     Route::get('/permissions/groups', [AdminWebController::class, 'permissionGroups'])->name('permissions.groups');
     Route::get('/permissions/roles', [AdminWebController::class, 'permissionRoles'])->name('permissions.roles');
+
+    // Groups CRUD
+    Route::post('/permissions/groups', [AdminPermissionController::class, 'storeGroup'])->name('permissions.groups.store');
+    Route::put('/permissions/groups/{group}', [AdminPermissionController::class, 'updateGroup'])->name('permissions.groups.update');
+    Route::patch('/permissions/groups/{group}/toggle', [AdminPermissionController::class, 'toggleGroup'])->name('permissions.groups.toggle');
+    Route::delete('/permissions/groups/{group}', [AdminPermissionController::class, 'destroyGroup'])->name('permissions.groups.destroy');
+
+    // Roles CRUD
+    Route::post('/permissions/roles', [AdminPermissionController::class, 'storeRole'])->name('permissions.roles.store');
+    Route::put('/permissions/roles/{role}', [AdminPermissionController::class, 'updateRole'])->name('permissions.roles.update');
+    Route::delete('/permissions/roles/{role}', [AdminPermissionController::class, 'destroyRole'])->name('permissions.roles.destroy');
+    Route::get('/permissions/roles/{role}/permissions', [AdminPermissionController::class, 'getRolePermissions'])->name('permissions.roles.permissions');
+    Route::put('/permissions/roles/{role}/sync-permissions', [AdminPermissionController::class, 'toggleRolePermissions'])->name('permissions.roles.sync-permissions');
 
     // ── Reference ──
     Route::get('/api-reference', [AdminWebController::class, 'apiReference'])->name('api-reference');

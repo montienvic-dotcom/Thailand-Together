@@ -30,7 +30,6 @@ class SuperAppWebController extends Controller
 
     public function clusterHome(Request $request, string $cluster)
     {
-        $user = $request->user();
         $cluster = Cluster::active()->where('slug', $cluster)->firstOrFail();
 
         $apps = $cluster->activeApplications()
@@ -38,7 +37,14 @@ class SuperAppWebController extends Controller
             ->orderBy('sort_order')
             ->get();
 
-        return view('superapp.cluster-home', compact('cluster', 'apps'));
+        $menuApps = $this->getMenuApps($cluster, $request->user());
+
+        return view('superapp.cluster-home', [
+            'cluster' => $cluster,
+            'apps' => $apps,
+            'currentCluster' => $cluster,
+            'menuApps' => $menuApps,
+        ]);
     }
 
     public function appDetail(Request $request, string $cluster, int $application)
@@ -48,8 +54,35 @@ class SuperAppWebController extends Controller
             ->findOrFail($application);
 
         $modules = $app->activeModules()->orderBy('sort_order')->get();
+        $menuApps = $this->getMenuApps($cluster, $request->user());
 
-        return view('superapp.app-detail', compact('cluster', 'app', 'modules'));
+        return view('superapp.app-detail', [
+            'cluster' => $cluster,
+            'app' => $app,
+            'modules' => $modules,
+            'currentCluster' => $cluster,
+            'menuApps' => $menuApps,
+            'activeApp' => $app,
+        ]);
+    }
+
+    /**
+     * Get menu-visible apps for a cluster, filtered by user permissions.
+     */
+    private function getMenuApps(Cluster $cluster, $user = null)
+    {
+        $apps = $cluster->activeApplications()
+            ->where('show_in_menu', true)
+            ->orderBy('sort_order')
+            ->get();
+
+        if ($user && !$user->isGlobalAdmin()) {
+            $apps = $apps->filter(function ($app) use ($user, $cluster) {
+                return $this->permissionResolver->canAccessApp($user, $cluster->id, $app->id);
+            })->values();
+        }
+
+        return $apps;
     }
 
     public function apiDocs()

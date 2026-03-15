@@ -85,7 +85,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/payment/{paymentId}/refund', [IntegrationController::class, 'refundPayment']);
 
         // SMS
-        Route::post('/sms/send', [IntegrationController::class, 'sendSms']);
+        Route::post('/sms/send', [IntegrationController::class, 'sendSMS']);
         Route::post('/sms/otp', [IntegrationController::class, 'sendOtp']);
 
         // AI Services

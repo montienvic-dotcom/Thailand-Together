@@ -62,7 +62,7 @@ class IntegrationController extends Controller
     /**
      * POST /api/integrations/sms/send
      */
-    public function sendSms(Request $request): JsonResponse
+    public function sendSMS(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'to' => 'required|string|max:20',
